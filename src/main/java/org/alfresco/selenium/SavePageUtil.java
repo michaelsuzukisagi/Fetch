@@ -25,6 +25,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 
@@ -58,9 +61,9 @@ import org.openqa.selenium.WebDriver;
  */
 public class SavePageUtil
 {
-    //TODO make it configurable
     private final static Log logger = LogFactory.getLog(SavePageUtil.class);
-    private final static String OUTPUT_DIR = "./target/content/";
+    private final static String OUTPUT_DIR = "./target/";
+    private final static String ASSET_DIR = OUTPUT_DIR + "content/";
     private final static Pattern SRC_PATTERN = Pattern.compile("(?<=src=\")[^\"]*(?<!\")");
     private final static Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
     private final static Pattern CSS_LINK_PATTERN = Pattern.compile("<link.*?\\>");
@@ -69,14 +72,12 @@ public class SavePageUtil
     public static void save(WebDriver driver, String filename) throws PageCaptureException, IOException
     {
         String html = driver.getPageSource();
-        
         //download all js files
         List<String> files = extractFiles(html);
-        //TODO change hard coded value
-        List<URL> urls = parseURL(files, "http://localhost:8080");
+        List<URL> urls = parseURL(files, "http://localhost:8080");//TODO remove hard coded values
         getFiles(urls, OUTPUT_DIR);
         String newhtml = parseHtml(html, files);
-        File file = new File("./target/" + filename);
+        File file = new File(OUTPUT_DIR + filename);
         FileUtils.writeStringToFile(file, newhtml);
         
     }
@@ -85,15 +86,16 @@ public class SavePageUtil
         String value = html.substring(0);
         for(String file : files)
         {
+            //Get the name of the asset.
             int index = file.lastIndexOf("/");
             String name = file.substring(index + 1);
-            value = value.replaceFirst(file, "./content/" + name);
+            value = value.replaceFirst(file, ASSET_DIR + name);
         }
         return value;
     }
     
     /**
-     * Extract source location of all files related to html.
+     * Extract source location of all files related to HTML.
      * @param html
      * @return List of all source locations relating to js, css and images
      */
@@ -101,10 +103,10 @@ public class SavePageUtil
     {
         List<String> list = new ArrayList<String>();
         //Find all src=
-        Matcher m = SRC_PATTERN.matcher(html);
-        while (m.find()) 
+        Matcher matchSrc = SRC_PATTERN.matcher(html);
+        while (matchSrc.find()) 
         {
-            list.add(m.group(0));
+            list.add(matchSrc.group(0));
         } 
         //find all url('')
         Matcher css = CSS_PATTERN.matcher(html);
@@ -168,7 +170,8 @@ public class SavePageUtil
      */
     public static void getFiles(List<URL> files, String pathname)
     {
-        for(URL source: files){
+        for(URL source: files)
+        {
             int index  = source.toString().lastIndexOf("/");
             String name = source.toString().substring(index + 1);
             File destination = new File(pathname + "/" + name);

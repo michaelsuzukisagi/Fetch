@@ -8,4 +8,5 @@ a page scrape should help identify any changes in the HTML or CSS.
 ###TODO
 1. Check that we dont over write files in content folder.
 2. Remove hard coded values.
-3. imporve on test to include a jetty loader. 
+3. Try against other sites
+4. imporve on test to include a jetty loader. 
