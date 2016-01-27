@@ -127,7 +127,7 @@ public class SavePageUtil
     /**
      * Parse collection of file paths to URL.
      * @param files collection of paths
-     * @param baseUrl url prefix for relativep path
+     * @param baseUrl the url prefix for relative path
      * @return Collection of URL
      */
     public static List<URL> parseURL(List<String> files,final String baseUrl)
@@ -139,7 +139,7 @@ public class SavePageUtil
         //Strip tail "/"
         String base = StringUtils.removeEnd(baseUrl, "/");
         List<URL> urls = new ArrayList<URL>();
-        files.forEach(url ->
+        for(String url : files)
         {
             try
             {
@@ -158,7 +158,7 @@ public class SavePageUtil
             {
                 logger.error("Unable to parse url", e);
             }
-        }); 
+        } 
         return urls;
     }
     /**
@@ -168,11 +168,10 @@ public class SavePageUtil
      */
     public static void getFiles(List<URL> files, String pathname)
     {
-        files.forEach(source->{
+        for(URL source: files){
             int index  = source.toString().lastIndexOf("/");
             String name = source.toString().substring(index + 1);
             File destination = new File(pathname + "/" + name);
-            
             try
             {
                 FileUtils.copyURLToFile(source, destination);
@@ -181,7 +180,7 @@ public class SavePageUtil
             {
                 logger.error(e);
             } 
-        });
+        }
     }
 
 }
