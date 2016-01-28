@@ -25,7 +25,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,9 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -51,43 +48,58 @@ import org.openqa.selenium.WebDriver;
  * js  all javascripts imported by the page.
  * <p>
  * Example usage:
- * CapturePageUtil.save(driver)
+ * SavePageUtil.save(driver)
  * <pre>
  *
- * boolean saved = PageCapture.save(driver);
+ * boolean saved = SavePageUtil.save(driver);
  * </pre>
  *
- * @see OutputType
+ * @author Michael Suzuki
  */
 public class SavePageUtil
 {
     private final static Log logger = LogFactory.getLog(SavePageUtil.class);
-    private final static String OUTPUT_DIR = "./target/";
-    private final static String ASSET_DIR = OUTPUT_DIR + "content/";
-    private final static Pattern SRC_PATTERN = Pattern.compile("(?<=src=\")[^\"]*(?<!\")");
-    private final static Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
-    private final static Pattern CSS_LINK_PATTERN = Pattern.compile("<link.*?\\>");
-    private final static Pattern HREF_PATTERN = Pattern.compile("(?<=href=\").*?(?=\")");
-    
-    public static void save(WebDriver driver, String filename) throws PageCaptureException, IOException
+    private static final String GET_BASE_URL_JS_COMMAND = "return document.location.origin;";
+    private static final String URL_PATH_SEPARATOR = "/";
+    private static final String OUTPUT_DIR = "./target/";
+    private static final String ASSET_DIR = OUTPUT_DIR + "content/";
+    /* regex to locate and extract source of all assets */
+    private static final Pattern SRC_PATTERN = Pattern.compile("(?<=src=\")[^\"]*(?<!\")");
+    private static final Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
+    private static final Pattern CSS_LINK_PATTERN = Pattern.compile("<link.*?\\>");
+    private static final Pattern HREF_PATTERN = Pattern.compile("(?<=href=\").*?(?=\")");
+    /**
+     * Saves the current page as seen by the WebDriver
+     * @param driver {@link WebDriver}
+     * @param filename name of the HTML file output
+     * @throws PageCaptureException if error
+     * @throws IOException
+     */
+    public static void save(final WebDriver driver,final String filename) throws PageCaptureException, IOException
     {
-        String html = driver.getPageSource();
-        //download all js files
-        List<String> files = extractFiles(html);
-        List<URL> urls = parseURL(files, "http://localhost:8080");//TODO remove hard coded values
+        String sourceHtml = driver.getPageSource();
+        String host = (String)((JavascriptExecutor) driver).executeScript(GET_BASE_URL_JS_COMMAND);
+        //download all assets: js,img and stylesheet.
+        List<String> files = extractFiles(sourceHtml);
+        List<URL> urls = parseURL(files, host); 
         getFiles(urls, OUTPUT_DIR);
-        String newhtml = parseHtml(html, files);
+        String html = parseHtml(sourceHtml, files);
         File file = new File(OUTPUT_DIR + filename);
-        FileUtils.writeStringToFile(file, newhtml);
-        
+        FileUtils.writeStringToFile(file, html);
     }
+    /**
+     * Updates the HTML with the new locations of assets.
+     * @param html
+     * @param files
+     * @return
+     */
     public static String parseHtml(String html, List<String> files)
     {
         String value = html.substring(0);
         for(String file : files)
         {
             //Get the name of the asset.
-            int index = file.lastIndexOf("/");
+            int index = file.lastIndexOf(URL_PATH_SEPARATOR);
             String name = file.substring(index + 1);
             value = value.replaceFirst(file, ASSET_DIR + name);
         }
@@ -126,6 +138,7 @@ public class SavePageUtil
         } 
         return list;
     }
+    
     /**
      * Parse collection of file paths to URL.
      * @param files collection of paths
@@ -139,7 +152,7 @@ public class SavePageUtil
             return Collections.emptyList();
         }
         //Strip tail "/"
-        String base = StringUtils.removeEnd(baseUrl, "/");
+        String base = StringUtils.removeEnd(baseUrl, URL_PATH_SEPARATOR);
         List<URL> urls = new ArrayList<URL>();
         for(String url : files)
         {
@@ -148,7 +161,7 @@ public class SavePageUtil
                 if(!url.startsWith("http"))
                 {
                     //Check if / is needed as we striped / from the base url.
-                    String p = url.startsWith("/") ? base + url : base + "/" + url;
+                    String p = url.startsWith(URL_PATH_SEPARATOR) ? base + url : base + URL_PATH_SEPARATOR + url;
                     urls.add(new URL(p));
                 }
                 else
@@ -172,9 +185,9 @@ public class SavePageUtil
     {
         for(URL source: files)
         {
-            int index  = source.toString().lastIndexOf("/");
+            int index  = source.toString().lastIndexOf(URL_PATH_SEPARATOR);
             String name = source.toString().substring(index + 1);
-            File destination = new File(pathname + "/" + name);
+            File destination = new File(pathname + URL_PATH_SEPARATOR + name);
             try
             {
                 FileUtils.copyURLToFile(source, destination);

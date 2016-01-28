@@ -39,7 +39,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 
 /**
- * 
+ * Tests the functions in SavePage.
  * @author Michael Suzuki
  * 
  */
