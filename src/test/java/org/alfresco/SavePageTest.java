@@ -257,6 +257,13 @@ public  class SavePageTest
         SavePageUtil.save(driver, "alfresco.html");
     }
     
+    @Test
+    public void saveGoogle() throws IOException
+    {
+        driver.navigate().to("http://www.google.com");
+        SavePageUtil.save(driver, "google.html");
+    }
+    
     public WebElement findAndWait(final By by, final long limit, final long interval)
     {
         FluentWait<By> fluentWait = new FluentWait<By>(by);

@@ -110,7 +110,6 @@ public class SavePageUtil
         while (matchSrc.find()) 
         {
             String i = matchSrc.group(0);
-            System.out.println(i);
             list.add(i);
         } 
         //find all url('')
