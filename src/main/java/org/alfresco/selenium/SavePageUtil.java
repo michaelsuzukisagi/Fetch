@@ -204,6 +204,10 @@ public class SavePageUtil
      */
     public static String parseHtml(String html, List<String> files)
     {
+        if(html == null || html.isEmpty())
+        {
+            throw new RuntimeException("Html source code is required");
+        }
         String value = html.substring(0);
         value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);
         for(String file : files)

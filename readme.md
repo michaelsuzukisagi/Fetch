@@ -1,13 +1,11 @@
-###Selenuim page capture
-Utility which stores the page as seen by the webdriver.
-Scarping the page should help with debugging and inspecting the page at future date.
-Screen shots are effective but do not reveal any code changes in the UI, having
-a page scrape should help identify any changes in the HTML or CSS.
-### Get the code
-Git:
- git clone https://github.com/michaelsuzukisagi/savepage.git
+#Selenuim page capture
+A utility which stores the page as seen by the WebDriver.
 
-### Use Maven
+## Features
+- **Debugging**, the ability to reload the page to inspect HTML changes.
+- **Quick feedback loop **, eliminates the need to recreate the environment and steps.
+
+## Use Maven
 Import the project
 ```
 <dependency>
@@ -16,7 +14,7 @@ Import the project
     <version>1.0</version>
 </dependency>
 ```
-### Usage
+## Usage
 ```
 WebDriver driver = new FireFoxDriver();
 SavePageUtil.save(driver, "mytest.html");
