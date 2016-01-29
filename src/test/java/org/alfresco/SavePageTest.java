@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.alfresco.selenium.PageCaptureException;
 import org.alfresco.selenium.SavePageUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -82,14 +81,14 @@ public  class SavePageTest
         driver.quit();
     }
     @Test
-    public void extractNoContent() throws PageCaptureException, IOException
+    public void extractNoContent() throws IOException
     {
         String test = "<head></head>";
         List<String> list = SavePageUtil.extractFiles(test);
         Assert.assertEquals(0, list.size());
     }
     @Test
-    public void extractCSS() throws PageCaptureException, IOException
+    public void extractCSS() throws IOException
     {
         List<String> list = SavePageUtil.extractFiles(test);
         Assert.assertEquals(6, list.size());
@@ -135,7 +134,7 @@ public  class SavePageTest
     }
     
     @Test
-    public void saveFile() throws PageCaptureException, IOException
+    public void saveFile() throws IOException
     {
         
         SavePageUtil.save(driver, "mytest.html");

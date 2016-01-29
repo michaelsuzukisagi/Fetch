@@ -75,14 +75,14 @@ public class SavePageUtil
      * @throws PageCaptureException if error
      * @throws IOException
      */
-    public static void save(final WebDriver driver,final String filename) throws PageCaptureException, IOException
+    public static void save(final WebDriver driver,final String filename) throws IOException 
     {
         String sourceHtml = driver.getPageSource();
         String host = (String)((JavascriptExecutor) driver).executeScript(GET_BASE_URL_JS_COMMAND);
         //download all assets: js,img and stylesheet.
         List<String> files = extractFiles(sourceHtml);
         List<URL> urls = parseURL(files, host); 
-        getFiles(urls, OUTPUT_DIR);
+        getFiles(urls, ASSET_DIR);
         String html = parseHtml(sourceHtml, files);
         File file = new File(OUTPUT_DIR + filename);
         FileUtils.writeStringToFile(file, html);
