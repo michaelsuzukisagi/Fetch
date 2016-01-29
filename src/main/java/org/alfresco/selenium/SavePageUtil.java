@@ -61,7 +61,7 @@ public class SavePageUtil
     private final static Log logger = LogFactory.getLog(SavePageUtil.class);
     private static final String GET_BASE_URL_JS_COMMAND = "return document.location.origin;";
     private static final String URL_PATH_SEPARATOR = "/";
-    private static final String OUTPUT_DIR = "./target/";
+    private static final String OUTPUT_DIR = "./target/public/";
     private static final String ASSET_FOLDER =  "content/";
     private static final String ASSET_DIR = OUTPUT_DIR + ASSET_FOLDER;
     /* regex to locate and extract source of all assets */
@@ -69,6 +69,7 @@ public class SavePageUtil
     private static final Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
     private static final Pattern CSS_LINK_PATTERN = Pattern.compile("<link.*?\\>");
     private static final Pattern HREF_PATTERN = Pattern.compile("(?<=href=\").*?(?=\")");
+    //Required to handle strange characters on the page.
     private static final String UTF8_HTML = "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">";
     /**
      * Saves the current page as seen by the WebDriver

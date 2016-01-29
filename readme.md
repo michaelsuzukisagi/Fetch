@@ -21,22 +21,17 @@ SavePageUtil.save(driver, "mytest.html");
 ```
 To see the html output, open with browser:
 ```
-./target/mytest.html
+./target/public/mytest.html
 ```
 ## Project layout
-```
+
 .
 ├── /pom.xml                    # Project meta data and build information.
 ├── /src/                       # Source location.
 |   ├── main                    # Main code.
 |   ├── test                    # Test code.
 ├── /target/                    # Project output location.
-│   ├── /content/               # The asset directory which stores the js,css and images.
-│   ├── mytest.html             # The html that is captured by the utility
-
-###TODO
-1. Check that we dont over write files in content folder. 
-2. Try against other sites
-3. imporve on test to include a jetty loader. 
-4. Update documentation
-5. Improve to check file firest before getting it
+│   ├── /public/                # The directory which all content is stored to.
+│   │   ├── mytest.html         # The html that is captured by the utility
+│   │   ├── /content/           # The directory of all the assets(js, css and images).
+```
