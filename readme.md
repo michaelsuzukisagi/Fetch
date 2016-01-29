@@ -24,7 +24,7 @@ To see the html output, open with browser:
 ./target/public/mytest.html
 ```
 ## Project layout
-
+```
 .
 ├── /pom.xml                    # Project meta data and build information.
 ├── /src/                       # Source location.
@@ -32,4 +32,6 @@ To see the html output, open with browser:
 |   ├── test                    # Test code.
 ├── /target/                    # Project output location.
 │   ├── /public/                # The directory which all content is stored to.
-
+│   │   ├── mytest.html         # The html that is captured by the utility
+│   │   ├── /content/           # The directory of all the assets(js, css and images).
+```
