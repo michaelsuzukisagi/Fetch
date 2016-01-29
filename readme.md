@@ -16,9 +16,14 @@ Import the project
     <version>1.0</version>
 </dependency>
 ```
+### Usage
+```
+WebDriver driver = new FireFoxDriver();
+SavePageUtil.save(driver, "mytest.html");
+```
 
 ###TODO
-1. Check that we dont over write files in content folder.
-2. Remove hard coded values.
-3. Try against other sites
-4. imporve on test to include a jetty loader. 
+1. Check that we dont over write files in content folder. // Doesnt overwrite files unless test html files
+2. Try against other sites
+3. imporve on test to include a jetty loader. 
+4. Update documentation
