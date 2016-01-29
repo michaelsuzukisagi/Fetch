@@ -69,6 +69,7 @@ public class SavePageUtil
     private static final Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
     private static final Pattern CSS_LINK_PATTERN = Pattern.compile("<link.*?\\>");
     private static final Pattern HREF_PATTERN = Pattern.compile("(?<=href=\").*?(?=\")");
+    private static final String UTF8_HTML = "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">";
     /**
      * Saves the current page as seen by the WebDriver
      * @param driver {@link WebDriver}
@@ -79,13 +80,15 @@ public class SavePageUtil
     public static void save(final WebDriver driver,final String filename) throws IOException 
     {
         String sourceHtml = driver.getPageSource();
+        String currentUrl = driver.getCurrentUrl();
         String host = (String)((JavascriptExecutor) driver).executeScript(GET_BASE_URL_JS_COMMAND);
         //download all assets: js,img and stylesheet.
         List<String> files = extractFiles(sourceHtml);
-        List<URL> urls = parseURL(files, host); 
+        List<URL> urls = parseURL(files, host, currentUrl); 
         getFiles(urls, ASSET_DIR);
         String html = parseHtml(sourceHtml, files);
         File file = new File(OUTPUT_DIR + filename);
+        file.delete();
         FileUtils.writeStringToFile(file, html);
     }
     /**
@@ -97,6 +100,7 @@ public class SavePageUtil
     public static String parseHtml(String html, List<String> files)
     {
         String value = html.substring(0);
+        value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);
         for(String file : files)
         {
             //Get the name of the asset.
@@ -146,7 +150,7 @@ public class SavePageUtil
      * @param baseUrl the url prefix for relative path
      * @return Collection of URL
      */
-    public static List<URL> parseURL(List<String> files,final String baseUrl)
+    public static List<URL> parseURL(List<String> files,final String baseUrl, final String currentURL)
     {
         if(files == null || files.isEmpty())
         {
@@ -161,9 +165,17 @@ public class SavePageUtil
             {
                 if(!url.startsWith("http"))
                 {
-                    //Check if / is needed as we striped / from the base url.
-                    String p = url.startsWith(URL_PATH_SEPARATOR) ? base + url : base + URL_PATH_SEPARATOR + url;
-                    urls.add(new URL(p));
+                    if(url.startsWith("."))
+                    {
+                        String relativePath = url.startsWith("..") ? url.substring(2) : url.substring(1);
+                        urls.add(new URL(currentURL + relativePath));
+                    }
+                    else
+                    {
+                        //Check if / is needed as we striped / from the base url.
+                        String p = url.startsWith(URL_PATH_SEPARATOR) ? base + url : base + URL_PATH_SEPARATOR + url;
+                        urls.add(new URL(p));
+                    }
                 }
                 else
                 {
