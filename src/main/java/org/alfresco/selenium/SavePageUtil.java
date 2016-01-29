@@ -61,9 +61,9 @@ public class SavePageUtil
     private final static Log logger = LogFactory.getLog(SavePageUtil.class);
     private static final String GET_BASE_URL_JS_COMMAND = "return document.location.origin;";
     private static final String URL_PATH_SEPARATOR = "/";
-    private static final String OUTPUT_DIR = "./target/public/";
-    private static final String ASSET_FOLDER =  "content/";
-    private static final String ASSET_DIR = OUTPUT_DIR + ASSET_FOLDER;
+    public static final String OUTPUT_DIR = "./target/public/";
+    public static final String ASSET_FOLDER =  "content/";
+    public static final String ASSET_DIR = OUTPUT_DIR + ASSET_FOLDER;
     /* regex to locate and extract source of all assets */
     private static final Pattern SRC_PATTERN = Pattern.compile("(?<=src=\")[^\"]*(?<!\")");
     private static final Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
@@ -86,9 +86,8 @@ public class SavePageUtil
         //download all assets: js,img and stylesheet.
         List<String> files = extractFiles(sourceHtml);
         List<URL> urls = parseURL(files, host, currentUrl); 
-        getFiles(urls, ASSET_DIR);
+        getFiles(urls);
         String html = parseHtml(sourceHtml, files);
-        System.out.println(html);
         File file = new File(OUTPUT_DIR + filename);
         file.delete();
         FileUtils.writeStringToFile(file, html);
@@ -101,6 +100,10 @@ public class SavePageUtil
      */
     public static List<String> extractFiles(final String html)
     {
+        if(html == null || html.isEmpty())
+        {
+            throw new RuntimeException("HTML source input required");
+        }
         List<String> list = new ArrayList<String>();
         //Find all src=
         Matcher matchSrc = SRC_PATTERN.matcher(html);
@@ -132,11 +135,20 @@ public class SavePageUtil
     /**
      * Parse collection of file paths to URL.
      * @param files collection of paths
-     * @param baseUrl the url prefix for relative path
+     * @param baseUrl Site domain URL, http://localhost:8080
+     * @param currentURL the driver.getCurrentUrl() value 
      * @return Collection of URL
      */
     public static List<URL> parseURL(List<String> files,final String baseUrl, final String currentURL)
     {
+        if(null == baseUrl || baseUrl.isEmpty())
+        {
+            throw new RuntimeException("Site domain url is required");
+        }
+        if(null == currentURL || currentURL.isEmpty())
+        {
+            throw new RuntimeException("Current WebDriver url is required");
+        }
         if(files == null || files.isEmpty())
         {
             return Collections.emptyList();
@@ -177,13 +189,15 @@ public class SavePageUtil
     /**
      * Download all external files to local directory.
      * @param files collection to download
-     * @param destination to store the files
      */
-    public static void getFiles(List<URL> files, String pathname)
+    public static void getFiles(List<URL> files)
     {
+        if(null == files)
+        {
+            throw new RuntimeException("Collections of url's are required");
+        }
         for(URL source: files)
         {
-            System.out.println(source);
             int index  = source.toString().lastIndexOf(URL_PATH_SEPARATOR);
             String name = source.toString().substring(index + 1);
             File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
@@ -211,12 +225,15 @@ public class SavePageUtil
         }
         String value = html.substring(0);
         value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);
-        for(String file : files)
+        if(files != null)
         {
-            //Get the name of the asset.
-            int index = file.lastIndexOf(URL_PATH_SEPARATOR);
-            String name = file.substring(index + 1);
-            value = value.replaceFirst(file, "./" + ASSET_FOLDER + name);
+            for(String file : files)
+            {
+                //Get the name of the asset.
+                int index = file.lastIndexOf(URL_PATH_SEPARATOR);
+                String name = file.substring(index + 1);
+                value = value.replaceFirst(file, "./" + ASSET_FOLDER + name);
+            }
         }
         return value;
     }

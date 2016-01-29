@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.alfresco.selenium.SavePageUtil;
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -68,17 +69,20 @@ public  class SavePageTest
             
     protected final static String ALFRESCO_TEST_URL = "http://localhost:8080/alfresco";
     protected final static String SHARE_TEST_URL = "http://localhost:8080/share";
+    
     @BeforeClass
     public static void setup()
     {
         driver = new FirefoxDriver();
         driver.navigate().to(SHARE_TEST_URL);
     }
+    
     @AfterClass
     public static void clean()
     {
         driver.quit();
     }
+    
     @Test
     public void extractNoContent() throws IOException
     {
@@ -86,6 +90,19 @@ public  class SavePageTest
         List<String> list = SavePageUtil.extractFiles(test);
         Assert.assertEquals(0, list.size());
     }
+    
+    @Test(expected = RuntimeException.class)
+    public void extractNullFiles() throws IOException
+    {
+        SavePageUtil.extractFiles(null);
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void extractEmptyFiles() throws IOException
+    {
+        SavePageUtil.extractFiles("");
+    }
+    
     @Test
     public void extractFiles() throws IOException
     {
@@ -99,38 +116,117 @@ public  class SavePageTest
         Assert.assertEquals("/share/res/yui/columnbrowser/assets/columnbrowser_a6ca750d53c6b6c201614545f6c33ee7.css", list.get(5));
         Assert.assertEquals("/css/alfresco.css", list.get(6));
     }
+    
+    @Test
+    public void parseNullURL() 
+    {
+        List<URL> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
+        Assert.assertEquals(0, nullList.size());
+    }
+    
+    @Test
+    public void parseEmptyURL() 
+    {
+        List<URL> nolists = SavePageUtil.parseURL(Collections.emptyList(), "http://localhost:8080/main", "http://localhost:8080");
+        Assert.assertEquals(0, nolists.size());
+    }
+    
     @Test
     public void parseURL() 
     {
         List<String> files = SavePageUtil.extractFiles(test);
-        List<URL> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", null);
+        List<URL> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080");
         Assert.assertEquals(7, urls.size());
-        List<URL> urls2 = SavePageUtil.parseURL(files, "http://localhost:8080/main", null);
+        List<URL> urls2 = SavePageUtil.parseURL(files, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(7, urls2.size());
-        List<URL> urlsWithNoBase = SavePageUtil.parseURL(files, "",null);
-        Assert.assertEquals(1, urlsWithNoBase.size());
-        List<URL> urlsWithull = SavePageUtil.parseURL(files, null,null);
-        Assert.assertEquals(1, urlsWithull.size());
-        List<URL> nolists = SavePageUtil.parseURL(Collections.emptyList(), "http://localhost:8080/main", null);
-        Assert.assertEquals(0, nolists.size());
-        List<URL> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", null);
+        
+        List<URL> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(0, nullList.size());
     }
-    @Test
-    public void getFiles() throws MalformedURLException
+    
+    @Test(expected = RuntimeException.class)
+    public void parseNullDomain()
     {
-        new File("./target/content/").mkdirs();
-        List<String> files = SavePageUtil.extractFiles(test);
-        List<URL> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", null);
-        SavePageUtil.getFiles(urls, "./target/content/");
+        SavePageUtil.parseURL(null, null,"http://localhost:8080");
     }
-    @Test
-    public void getCDN() throws MalformedURLException
+    
+    @Test(expected = RuntimeException.class)
+    public void parseNullCurrentURL()
     {
+        SavePageUtil.parseURL(null, "http://localhost:8080", null);
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void parseEmptyDomain()
+    {
+        SavePageUtil.parseURL(null, "","http://localhost:8080");
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void parseEmptyCurrentUrl()
+    {
+        SavePageUtil.parseURL(null, "http://localhost:8080", "");
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void getFilesNull() throws MalformedURLException
+    {
+        SavePageUtil.getFiles(null);
+    }
+    
+    @Test
+    public void getFilesEmpty() throws MalformedURLException
+    {
+        SavePageUtil.getFiles(Collections.emptyList());
+    }
+    
+    @Test
+    public void getFiles() throws IOException
+    {
+        File folder = new File(SavePageUtil.ASSET_DIR);
+        FileUtils.deleteDirectory(folder);
+        folder.mkdirs();
+        File[] filesInFolder = folder.listFiles();
+        int start = filesInFolder.length;
+        
+        List<String> files = SavePageUtil.extractFiles(test);
+        List<URL> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080/");
+        SavePageUtil.getFiles(urls);
+        int end = folder.listFiles().length;
+        Assert.assertNotEquals(start, end);
+        Assert.assertEquals(3, end);
+    }
+    
+    @Test
+    public void getCDN() throws IOException
+    {
+        File folder = new File(SavePageUtil.ASSET_DIR);
+        FileUtils.deleteDirectory(folder);
+        folder.mkdirs();
+        File[] filesInFolder = folder.listFiles();
+        int start = filesInFolder.length;
+        
         List<URL> files = new ArrayList<URL>();
         files.add(new URL("https://cdn-www.alfresco.com/sites/www.alfresco.com/files//advagg_css/css__YZMmyCjxADNsxWJVyzxskiYBiPsGboww8DDJoAv1iVA__PqGVjSeXe3e-YM4xspxCavDlyydtEB28TRpZPTEwV5I__-BEWX4mtkwr1skpja3HlI8KN54EGjkcptZCT0YQ6Cjw.css"));
-        SavePageUtil.getFiles(files, "./target/content/");
+        SavePageUtil.getFiles(files);
+        
+        int end = folder.listFiles().length;
+        Assert.assertNotEquals(start, end);
+        Assert.assertEquals(1, end);
     }
+    
+    @Test(expected = RuntimeException.class)
+    public void parseHTMLNull()
+    {
+        SavePageUtil.extractFiles(null);
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void parseHTMLEmpty()
+    {
+        SavePageUtil.extractFiles("");
+    }
+    
     @Test
     public void parseHTML()
     {
@@ -153,12 +249,14 @@ public  class SavePageTest
         findAndWait(By.id("FCTSRCH_RESULTS_COUNT_LABEL"), 3000, 100);
         SavePageUtil.save(driver, "mytest.html");
     }
+    
     @Test
     public void saveAlfresco() throws IOException
     {
         driver.navigate().to(ALFRESCO_TEST_URL);
         SavePageUtil.save(driver, "alfresco.html");
     }
+    
     public WebElement findAndWait(final By by, final long limit, final long interval)
     {
         FluentWait<By> fluentWait = new FluentWait<By>(by);
