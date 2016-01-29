@@ -2,8 +2,8 @@
 A utility which stores the page as seen by the WebDriver.
 
 ## Features
-- **Debugging**, the ability to reload the page to inspect HTML changes.
-- **Quick feedback loop **, eliminates the need to recreate the environment and steps.
+- **Debugging** provides the ability to reload the rendered page, to inspect HTML changes.
+- **Quick feedback loop** eliminates the need to recreate the environment and steps.
 
 ## Use Maven
 Import the project
