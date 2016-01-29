@@ -62,7 +62,8 @@ public class SavePageUtil
     private static final String GET_BASE_URL_JS_COMMAND = "return document.location.origin;";
     private static final String URL_PATH_SEPARATOR = "/";
     private static final String OUTPUT_DIR = "./target/";
-    private static final String ASSET_DIR = OUTPUT_DIR + "content/";
+    private static final String ASSET_FOLDER =  "content/";
+    private static final String ASSET_DIR = OUTPUT_DIR + ASSET_FOLDER;
     /* regex to locate and extract source of all assets */
     private static final Pattern SRC_PATTERN = Pattern.compile("(?<=src=\")[^\"]*(?<!\")");
     private static final Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
@@ -101,7 +102,7 @@ public class SavePageUtil
             //Get the name of the asset.
             int index = file.lastIndexOf(URL_PATH_SEPARATOR);
             String name = file.substring(index + 1);
-            value = value.replaceFirst(file, ASSET_DIR + name);
+            value = value.replaceFirst(file, "./" + ASSET_FOLDER + name);
         }
         return value;
     }
@@ -187,7 +188,7 @@ public class SavePageUtil
         {
             int index  = source.toString().lastIndexOf(URL_PATH_SEPARATOR);
             String name = source.toString().substring(index + 1);
-            File destination = new File(pathname + URL_PATH_SEPARATOR + name);
+            File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
             try
             {
                 FileUtils.copyURLToFile(source, destination);
