@@ -87,28 +87,10 @@ public class SavePageUtil
         List<URL> urls = parseURL(files, host, currentUrl); 
         getFiles(urls, ASSET_DIR);
         String html = parseHtml(sourceHtml, files);
+        System.out.println(html);
         File file = new File(OUTPUT_DIR + filename);
         file.delete();
         FileUtils.writeStringToFile(file, html);
-    }
-    /**
-     * Updates the HTML with the new locations of assets.
-     * @param html
-     * @param files
-     * @return
-     */
-    public static String parseHtml(String html, List<String> files)
-    {
-        String value = html.substring(0);
-        value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);
-        for(String file : files)
-        {
-            //Get the name of the asset.
-            int index = file.lastIndexOf(URL_PATH_SEPARATOR);
-            String name = file.substring(index + 1);
-            value = value.replaceFirst(file, "./" + ASSET_FOLDER + name);
-        }
-        return value;
     }
     
     /**
@@ -116,14 +98,16 @@ public class SavePageUtil
      * @param html
      * @return List of all source locations relating to js, css and images
      */
-    public static List<String> extractFiles(String html)
+    public static List<String> extractFiles(final String html)
     {
         List<String> list = new ArrayList<String>();
         //Find all src=
         Matcher matchSrc = SRC_PATTERN.matcher(html);
         while (matchSrc.find()) 
         {
-            list.add(matchSrc.group(0));
+            String i = matchSrc.group(0);
+            System.out.println(i);
+            list.add(i);
         } 
         //find all url('')
         Matcher css = CSS_PATTERN.matcher(html);
@@ -198,6 +182,7 @@ public class SavePageUtil
     {
         for(URL source: files)
         {
+            System.out.println(source);
             int index  = source.toString().lastIndexOf(URL_PATH_SEPARATOR);
             String name = source.toString().substring(index + 1);
             File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
@@ -211,5 +196,23 @@ public class SavePageUtil
             } 
         }
     }
-
+    /**
+     * Updates the HTML with the new locations of assets.
+     * @param html
+     * @param files
+     * @return
+     */
+    public static String parseHtml(String html, List<String> files)
+    {
+        String value = html.substring(0);
+        value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);
+        for(String file : files)
+        {
+            //Get the name of the asset.
+            int index = file.lastIndexOf(URL_PATH_SEPARATOR);
+            String name = file.substring(index + 1);
+            value = value.replaceFirst(file, "./" + ASSET_FOLDER + name);
+        }
+        return value;
+    }
 }
