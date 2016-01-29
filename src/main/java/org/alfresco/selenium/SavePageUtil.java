@@ -48,7 +48,7 @@ import org.openqa.selenium.WebDriver;
  * js  all javascripts imported by the page.
  * <p>
  * Example usage:
- * SavePageUtil.save(driver)
+ * SavePageUtil.save(driver, name.html)
  * <pre>
  *
  * boolean saved = SavePageUtil.save(driver);
