@@ -32,6 +32,6 @@ To see the html output, open with browser:
 |   ├── test                    # Test code.
 ├── /target/                    # Project output location.
 │   ├── /public/                # The output directory of the utility.
-│   │   ├── mytest.html         # The HTML that is captured by the utility
+│   │   ├── mytest.html         # The HTML that is captured by the utility.
 │   │   ├── /content/           # The directory which contains all the retrieved assets(js, css and images).
 ```
