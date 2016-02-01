@@ -25,7 +25,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.alfresco.selenium.SavePageUtil;
 import org.apache.commons.io.FileUtils;
@@ -33,19 +32,12 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.FluentWait;
-
-import com.google.common.base.Predicate;
 
 
 /**
- * Tests the functions in SavePage.
+ * Tests the save function against different web sites.
  * @author Michael Suzuki
  * 
  */
@@ -115,7 +107,7 @@ public  class SavePageTest
         Assert.assertEquals("/share/res/css/yui-fonts-grids_fe8fbe97553ea9e004731970a95a499b.css", list.get(4));
         Assert.assertEquals("/share/res/yui/columnbrowser/assets/columnbrowser_a6ca750d53c6b6c201614545f6c33ee7.css", list.get(5));
         Assert.assertEquals("/css/alfresco.css", list.get(6));
-    }
+    } 
     
     @Test
     public void parseNullURL() 
@@ -137,6 +129,9 @@ public  class SavePageTest
         List<String> files = SavePageUtil.extractFiles(test);
         List<URL> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080");
         Assert.assertEquals(7, urls.size());
+        Assert.assertEquals("http://localhost:8080/share/proxy/alfresco/api/node/workspace/SpacesStore/99cb2789-f67e-41ff-bea9-505c138a6b23/content/thumbnails/doclib/?c=queue&ph=true&lastModified=2011-03-03T10:31:31.651Z",
+                urls.get(3).toString());
+
         List<URL> urls2 = SavePageUtil.parseURL(files, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(7, urls2.size());
         
@@ -233,63 +228,5 @@ public  class SavePageTest
         List<String> files = SavePageUtil.extractFiles(test);
         String html = SavePageUtil.parseHtml(test, files);
         Assert.assertNotEquals(test, html);
-    }
-    
-    @Test
-    public void saveFile() throws IOException
-    {
-        WebElement input = driver.findElement(By.name("username"));
-        input.sendKeys("admin");
-        WebElement password = driver.findElement(By.name("password"));
-        password.sendKeys("admin");
-        WebElement button = driver.findElement(By.tagName("button"));
-        button.click();
-        WebElement searchInput = driver.findElement(By.id("HEADER_SEARCHBOX_FORM_FIELD"));
-        searchInput.sendKeys("ipsum \r\n");
-        findAndWait(By.id("FCTSRCH_RESULTS_COUNT_LABEL"), 3000, 100);
-        SavePageUtil.save(driver, "mytest.html");
-    }
-    
-    @Test
-    public void saveAlfresco() throws IOException
-    {
-        driver.navigate().to(ALFRESCO_TEST_URL);
-        SavePageUtil.save(driver, "alfresco.html");
-    }
-    
-    @Test
-    public void saveGoogle() throws IOException
-    {
-        driver.navigate().to("http://www.google.com");
-        SavePageUtil.save(driver, "google.html");
-    }
-    
-    public WebElement findAndWait(final By by, final long limit, final long interval)
-    {
-        FluentWait<By> fluentWait = new FluentWait<By>(by);
-        fluentWait.pollingEvery(interval, TimeUnit.MILLISECONDS);
-        fluentWait.withTimeout(limit, TimeUnit.MILLISECONDS);
-        try
-        {
-            fluentWait.until(new Predicate<By>()
-            {
-                public boolean apply(By by)
-                {
-                    try
-                    {
-                        return driver.findElement(by).isDisplayed();
-                    }
-                    catch (NoSuchElementException ex)
-                    {
-                        return false;
-                    }
-                }
-            });
-            return driver.findElement(by);
-        }
-        catch (RuntimeException re)
-        {
-            throw new TimeoutException("Unable to locate element " + by);
-        }
     }
 }

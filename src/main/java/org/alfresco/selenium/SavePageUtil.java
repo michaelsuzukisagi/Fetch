@@ -132,7 +132,7 @@ public class SavePageUtil
     }
     
     /**
-     * Parse collection of file paths to URL.
+     * Parses file paths to URLs.
      * @param files collection of paths
      * @param baseUrl Site domain URL, http://localhost:8080
      * @param currentURL the driver.getCurrentUrl() value 
@@ -157,6 +157,8 @@ public class SavePageUtil
         List<URL> urls = new ArrayList<URL>();
         for(String url : files)
         {
+            //replace amp&; with &
+            url = url.replaceAll("&amp;", "&");
             try
             {
                 if(!url.startsWith("http"))
