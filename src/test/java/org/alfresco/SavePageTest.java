@@ -20,7 +20,6 @@ package org.alfresco;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -164,15 +163,15 @@ public  class SavePageTest
     }
     
     @Test(expected = RuntimeException.class)
-    public void getFilesNull() throws MalformedURLException
+    public void getFilesNull() throws IOException
     {
-        SavePageUtil.getFiles(null);
+        SavePageUtil.getFiles(null, driver);
     }
     
     @Test
-    public void getFilesEmpty() throws MalformedURLException
+    public void getFilesEmpty() throws IOException
     {
-        SavePageUtil.getFiles(Collections.emptyList());
+        SavePageUtil.getFiles(Collections.emptyList(), driver);
     }
     
     @Test
@@ -186,10 +185,10 @@ public  class SavePageTest
         
         List<String> files = SavePageUtil.extractFiles(test);
         List<URL> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080/");
-        SavePageUtil.getFiles(urls);
+        SavePageUtil.getFiles(urls, driver);
         int end = folder.listFiles().length;
         Assert.assertNotEquals(start, end);
-        Assert.assertEquals(3, end);
+        Assert.assertEquals(7, end);
     }
     
     @Test
@@ -203,7 +202,7 @@ public  class SavePageTest
         
         List<URL> files = new ArrayList<URL>();
         files.add(new URL("https://cdn-www.alfresco.com/sites/www.alfresco.com/files//advagg_css/css__YZMmyCjxADNsxWJVyzxskiYBiPsGboww8DDJoAv1iVA__PqGVjSeXe3e-YM4xspxCavDlyydtEB28TRpZPTEwV5I__-BEWX4mtkwr1skpja3HlI8KN54EGjkcptZCT0YQ6Cjw.css"));
-        SavePageUtil.getFiles(files);
+        SavePageUtil.getFiles(files, driver);
         
         int end = folder.listFiles().length;
         Assert.assertNotEquals(start, end);
@@ -229,4 +228,5 @@ public  class SavePageTest
         String html = SavePageUtil.parseHtml(test, files);
         Assert.assertNotEquals(test, html);
     }
+    
 }

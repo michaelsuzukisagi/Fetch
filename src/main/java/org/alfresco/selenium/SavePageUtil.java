@@ -18,7 +18,10 @@
  */
 package org.alfresco.selenium;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,6 +35,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -86,7 +97,7 @@ public class SavePageUtil
         //download all assets: js,img and stylesheet.
         List<String> files = extractFiles(sourceHtml);
         List<URL> urls = parseURL(files, host, currentUrl); 
-        getFiles(urls);
+        getFiles(urls, driver);
         String html = parseHtml(sourceHtml, files);
         File file = new File(OUTPUT_DIR + filename);
         file.delete();
@@ -190,8 +201,10 @@ public class SavePageUtil
     /**
      * Download all external files to local directory.
      * @param files collection to download
+     * @param driver {@link WebDriver}
+     * @throws IOException 
      */
-    public static void getFiles(List<URL> files)
+    public static void getFiles(List<URL> files, WebDriver driver) throws IOException
     {
         if(null == files)
         {
@@ -201,6 +214,11 @@ public class SavePageUtil
         {
             int index  = source.toString().lastIndexOf(URL_PATH_SEPARATOR);
             String name = source.toString().substring(index + 1);
+            //Strip ? as it causes problems when its a prefix. 
+            if(name.startsWith("?"))
+            {
+                name = name.replaceFirst("\\?", "");
+            }
             File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
             try
             {
@@ -209,6 +227,8 @@ public class SavePageUtil
             catch (Exception e)
             {
                 logger.error(e);
+                //Try with HttpClient
+                retrieveFile(source.toString(), driver, destination);
             } 
         }
     }
@@ -233,9 +253,97 @@ public class SavePageUtil
                 //Get the name of the asset.
                 int index = file.lastIndexOf(URL_PATH_SEPARATOR);
                 String name = file.substring(index + 1);
-                value = value.replaceFirst(file, "./" + ASSET_FOLDER + name);
+                if(name.startsWith("?"))
+                {
+                    try
+                    {
+                        //Java Regex cant handle ?[a-z]=
+                        String t[] = file.split("\\?");
+                        String prefix = t[0];
+                        String rest = t[1];
+                        //Remove ? from new filename.
+                        String updatedName = name.replaceFirst("\\?", ""); 
+                        value = value.replaceFirst(prefix + "\\?" + rest, "./" + ASSET_FOLDER + updatedName);
+                    }
+                    catch(Exception e)
+                    {
+                        logger.error("Unable to parse new url",e);
+                    }
+                }
+                else
+                {
+                    value = value.replaceFirst(file, "./" + ASSET_FOLDER + name);
+                }
             }
         }
         return value;
+    }
+    /**
+     * Retrieve file with authentication, using {@link WebDriver} cookie we
+     * keep the session and use HttpClient to download files that requires
+     * user to be authenticated. 
+     * @param resourceUrl path to file to download
+     * @param driver {@link WebDriver}
+     * @param output path to output the file
+     * @throws IOException if error
+     */
+    protected static void retrieveFile(final String resourceUrl,
+                                       final WebDriver driver,
+                                       final File output) throws IOException 
+    {
+        BasicCookieStore cookieStore = new BasicCookieStore();
+        cookieStore.addCookie(getSessionCookie(driver));
+        //Create http client to retrieve the file.
+        CloseableHttpClient client = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+        HttpGet httpGet = new HttpGet(resourceUrl);
+        BufferedOutputStream bos = null;
+        BufferedInputStream bis = null;
+        try 
+        {
+            HttpResponse httpResponse = client.execute(httpGet);
+            HttpEntity entity = httpResponse.getEntity();
+            bos = new BufferedOutputStream(new FileOutputStream(output));
+            bis = new BufferedInputStream(entity.getContent());
+            int inByte;
+            while((inByte = bis.read()) != -1) bos.write(inByte);
+        }
+        catch(Exception e)
+        {
+            logger.error(e);
+        }
+        finally
+        {
+            if(bis != null)
+            {
+                bis.close();
+            }
+            if(bos != null)
+            {
+                bos.close();
+            }
+        }
+    }
+
+    /**
+     * Prepare the client cookie based on the authenticated {@link WebDriver} 
+     * cookie. 
+     * @param driver {@link WebDriver}
+     * @return BasicClientCookie with correct credentials.
+     */
+    protected static BasicClientCookie getSessionCookie(WebDriver driver)
+    {
+        Cookie originalCookie = driver.manage().getCookieNamed("JSESSIONID");
+        if (originalCookie == null) 
+        {
+            return null;
+        }
+        // just build new apache-like cookie based on webDriver's one
+        String cookieName = originalCookie.getName();
+        String cookieValue = originalCookie.getValue();
+        BasicClientCookie resultCookie = new BasicClientCookie(cookieName, cookieValue);
+        resultCookie.setDomain(originalCookie.getDomain());
+        resultCookie.setExpiryDate(originalCookie.getExpiry());
+        resultCookie.setPath(originalCookie.getPath());
+        return resultCookie;
     }
 }
