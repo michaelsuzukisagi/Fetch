@@ -37,11 +37,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -204,7 +200,7 @@ public class SavePageUtil
             throw new RuntimeException("Collections of url's are required");
         }
         //Create a client to get content.
-        CloseableHttpClient client = getHttpClient(driver);
+        CloseableHttpClient client = HttpClientScraper.getHttpClient(driver);
         try
         {
             for(String source: files)
@@ -325,35 +321,5 @@ public class SavePageUtil
                 bos.close();
             }
         }
-    }
-
-    private static CloseableHttpClient getHttpClient(final WebDriver driver)
-    {
-        BasicCookieStore cookieStore = new BasicCookieStore();
-        cookieStore.addCookie(generateSessionCookie(driver));
-        //Create http client to retrieve the file.
-        return HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-    }
-    /**
-     * Prepare the client cookie based on the authenticated {@link WebDriver} 
-     * cookie. 
-     * @param driver {@link WebDriver}
-     * @return BasicClientCookie with correct credentials.
-     */
-    private static BasicClientCookie generateSessionCookie(WebDriver driver)
-    {
-        Cookie originalCookie = driver.manage().getCookieNamed("JSESSIONID");
-        if (originalCookie == null) 
-        {
-            return null;
-        }
-        // just build new apache-like cookie based on webDriver's one
-        String cookieName = originalCookie.getName();
-        String cookieValue = originalCookie.getValue();
-        BasicClientCookie resultCookie = new BasicClientCookie(cookieName, cookieValue);
-        resultCookie.setDomain(originalCookie.getDomain());
-        resultCookie.setExpiryDate(originalCookie.getExpiry());
-        resultCookie.setPath(originalCookie.getPath());
-        return resultCookie;
     }
 }
