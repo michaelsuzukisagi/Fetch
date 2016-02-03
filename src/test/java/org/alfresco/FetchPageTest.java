@@ -39,7 +39,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
  * @author Michael Suzuki
  * 
  */
-public  class SavePageTest
+public  class FetchPageTest
 {
     private static WebDriver driver;
     String test = "<head>"
@@ -205,7 +205,7 @@ public  class SavePageTest
         
         int end = folder.listFiles().length;
         Assert.assertNotEquals(start, end);
-        Assert.assertEquals(1, end);
+        Assert.assertEquals(7, end);
     }
     
     @Test(expected = RuntimeException.class)
@@ -228,4 +228,27 @@ public  class SavePageTest
         Assert.assertNotEquals(test, html);
     }
     
+    String css = "html.js input.form-autocomplete{background-image:url(//cdn-www.alfresco.com/misc/throbber-inactive.png);background-position:100% center;background-repeat:no-repeat;}html.js input.throbbing{background-image:url(//cdn-www.alfresco.com/misc/throbber-active.gif);background-position:100% center;";
+    
+    @Test
+    public void parseCSS() throws IOException
+    {
+        List<String> files = FetchUtil.parseCSS(css,driver);
+        Assert.assertEquals(2, files.size());
+        Assert.assertEquals("http://cdn-www.alfresco.com/misc/throbber-inactive.png", files.get(0));
+        Assert.assertEquals("http://cdn-www.alfresco.com/misc/throbber-active.gif", files.get(1));
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void parseCSSNull() throws IOException
+    {
+        FetchUtil.parseCSS(null,driver);
+    }
+    
+    @Test()
+    public void parseCSSEmpty() throws IOException
+    {
+        List<String> files = FetchUtil.parseCSS("",driver);
+        Assert.assertEquals(0, files.size());
+    }
 }

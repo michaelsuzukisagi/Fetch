@@ -26,7 +26,7 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 
 /**
- * PageSave HttpClient factory, provides an Http client
+ * Fetch HttpClient factory, provides an Http client
  * with user session taken from the {@link WebDriver}
  *
  * @author Michael Suzuki

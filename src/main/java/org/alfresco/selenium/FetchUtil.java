@@ -65,6 +65,7 @@ public class FetchUtil
     private static final Pattern SRC_PATTERN = Pattern.compile("(?<=src=\")[^\"]*(?<!\")");
     private static final Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
     private static final Pattern CSS_LINK_PATTERN = Pattern.compile("<link.*?\\>");
+    private static final Pattern CSS_BACKGOUND_IMG_PATTERN = Pattern.compile("(?<=background-image:url\\().*?(?=\\))");
     private static final Pattern HREF_PATTERN = Pattern.compile("(?<=href=\").*?(?=\")");
     //Required to handle strange characters on the page.
     private static final String UTF8_HTML = "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">";
@@ -83,17 +84,20 @@ public class FetchUtil
     {
         String sourceHtml = driver.getPageSource();
         String currentUrl = driver.getCurrentUrl();
-        String host = (String)((JavascriptExecutor) driver).executeScript(GET_BASE_URL_JS_COMMAND);
+        
         //download all assets: js,img and stylesheet.
         List<String> files = extractFiles(sourceHtml);
-        List<String> urls = parseURL(files, host, currentUrl); 
+        List<String> urls = parseURL(files, getHost(driver), currentUrl); 
         getFiles(urls, driver);
         String html = parseHtml(sourceHtml, files);
         File file = new File(OUTPUT_DIR + filename);
         file.delete();
         FileUtils.writeStringToFile(file, html);
     }
-    
+    public static String getHost(WebDriver driver)
+    {
+        return (String)((JavascriptExecutor) driver).executeScript(GET_BASE_URL_JS_COMMAND);
+    }
     /**
      * Extract source location of all files related to HTML.
      * @param html
@@ -199,22 +203,17 @@ public class FetchUtil
         {
             for(String source: files)
             {
-                int index  = source.lastIndexOf(URL_PATH_SEPARATOR);
-                String name = source.substring(index + 1);
-                //Strip ? as it causes problems when its a prefix. 
-                if(name.startsWith("?"))
+                File file = getFile(source, client);
+                if(source.endsWith("css"))
                 {
-                    name = name.replaceFirst("\\?", "");
+                    String css = FileUtils.readFileToString(file);
+                    List<String> csss = parseCSS(css,driver);
+                    if(!csss.isEmpty())
+                    {
+                        getFiles(csss, driver);
+//                        updateCss(csss, source);
+                    }
                 }
-                File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
-                try
-                {
-                    retrieveFile(source, client, destination);
-                } 
-                catch (Exception e)
-                {
-                    logger.error("Unable to get file", e);
-                } 
             }
         }
         finally
@@ -222,11 +221,76 @@ public class FetchUtil
             HttpClientUtils.closeQuietly(client);
         }
     }
+
+    /**
+     * Extract additional content found in css.
+     * @param source css 
+     * @return collection of files to get 
+     * @throws IOException if error
+     */
+    public static List<String> parseCSS(String source, WebDriver driver) throws IOException
+    {
+        if(source == null)
+        {
+            throw new RuntimeException("CSS source is required");
+        }
+        StringBuffer sb = new StringBuffer();
+        String domain = getHost(driver);
+        List<String> files = new ArrayList<String>();
+        Matcher matchSrc = CSS_BACKGOUND_IMG_PATTERN.matcher(source);
+        while (matchSrc.find()) 
+        {
+            String fileSource = matchSrc.group(0);
+            fileSource = fileSource.replaceAll("\"", "");
+            if(!fileSource.startsWith("data:image"))
+            {
+                if(fileSource.startsWith("//"))
+                {
+                    fileSource = fileSource.replace("//", "http://");
+                }
+                else if(fileSource.startsWith("/"))
+                {
+                    fileSource = fileSource.replaceFirst("/", domain + "/");
+                }
+                files.add(fileSource);
+                matchSrc.appendReplacement(sb, fileSource);
+            }
+        } 
+        return files;
+    }
+    /**
+     * Gets the external file using http client.
+     * @param source file name
+     * @param client {@link CloseableHttpClient}
+     * @return {@link File} output.
+     * @throws IOException if error
+     */
+    private static File getFile(final String source, final CloseableHttpClient client) throws IOException
+    {
+        int index  = source.lastIndexOf(URL_PATH_SEPARATOR);
+        String name = source.substring(index + 1);
+        //Strip ? as it causes problems when its a prefix. 
+        if(name.startsWith("?"))
+        {
+            name = name.replaceFirst("\\?", "");
+        }
+        if(name.startsWith("/"))
+        {
+            System.out.println("We got one!!!");
+        }
+        File target = new File(ASSET_DIR);
+        if(!target.exists()) 
+        {
+            target.mkdirs();
+        }
+        File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
+        return retrieveFile(source, client, destination);
+    }
     /**
      * Updates the HTML with the new locations of assets.
      * @param html
      * @param files
-     * @return
+     * @return update html source
      */
     public static String parseHtml(String html, List<String> files)
     {
@@ -277,7 +341,7 @@ public class FetchUtil
      * @param output path to output the file
      * @throws IOException if error
      */
-    protected static void retrieveFile(final String resourceUrl,
+    protected static File retrieveFile(final String resourceUrl,
                                        final CloseableHttpClient client,
                                        final File output) throws IOException 
     {
@@ -298,7 +362,7 @@ public class FetchUtil
         }
         catch(Exception e)
         {
-            logger.error(e);
+            logger.error("Unable to fetch file " + resourceUrl, e);
         }
         finally
         {
@@ -315,5 +379,6 @@ public class FetchUtil
                 bos.close();
             }
         }
+        return output;
     }
 }

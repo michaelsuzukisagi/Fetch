@@ -41,14 +41,14 @@ import com.google.common.base.Predicate;
  * @author Michael Suzuki
  * 
  */
-public  class SaveTest
+public  class FetchTest
 {
    private static WebDriver driver;
     @BeforeClass
     public static void setup()
     {
         driver = new FirefoxDriver();
-        driver.navigate().to(SavePageTest.SHARE_TEST_URL);
+        driver.navigate().to(FetchPageTest.SHARE_TEST_URL);
     }
     
     @AfterClass
@@ -67,24 +67,23 @@ public  class SaveTest
 //        WebElement button = driver.findElement(By.tagName("button"));
 //        button.click();
 //        WebElement searchInput = driver.findElement(By.id("HEADER_SEARCHBOX_FORM_FIELD"));
-//        SavePageUtil.save(driver, "dashboard.html");
+//        FetchUtil.save(driver, "dashboard.html");
 //        searchInput.sendKeys("ipsum \r\n");
 //        findAndWait(By.id("FCTSRCH_RESULTS_COUNT_LABEL"));
-//        SavePageUtil.save(driver, "faceted-search.html");
+//        FetchUtil.save(driver, "faceted-search.html");
 //        driver.navigate().to("http://localhost:8080/share/page/site/swsdp/document-details?nodeRef=workspace://SpacesStore/5515d3e1-bb2a-42ed-833c-52802a367033");
 //        findAndWait(By.id("document-version"));
-//        SavePageUtil.save(driver, "document-details.html");
+//        FetchUtil.save(driver, "document-details.html");
 //        driver.navigate().to("http://localhost:8080/share/page/site/swsdp/documentlibrary");
 //        findAndWait(By.id("HEADER_SITE_CONFIGURATION_DROPDOWN"));
-//        SavePageUtil.save(driver, "document-library.html");
-//        
+//        FetchUtil.save(driver, "document-library.html");
 //    }
 //    
 //    @Test
 //    public void saveAlfresco() throws IOException
 //    {
-//        driver.navigate().to(SavePageTest.ALFRESCO_TEST_URL);
-//        SavePageUtil.save(driver, "alfresco.html");
+//        driver.navigate().to(FetchUtil.ALFRESCO_TEST_URL);
+//        FetchUtil.save(driver, "alfresco.html");
 //    }
     @Test
     public void saveAlfrescoHomePage() throws IOException
@@ -96,7 +95,13 @@ public  class SaveTest
 //    public void saveGoogle() throws IOException
 //    {
 //        driver.navigate().to("http://www.google.com");
-//        SavePageUtil.save(driver, "google.html");
+//        FetchUtil.save(driver, "google.html");
+//    }
+//    @Test
+//    public void saveBBC() throws IOException
+//    {
+//        driver.navigate().to("bbc");
+//        FetchUtil.save(driver, "bbc.html");
 //    }
 //    @Test
 //    public void saveGitHub() throws IOException
