@@ -206,8 +206,7 @@ public class FetchUtil
                 File file = getFile(source, client);
                 if(source.endsWith("css"))
                 {
-                    String css = FileUtils.readFileToString(file);
-                    List<String> csss = parseCSS(css,driver);
+                    List<String> csss = parseCSS(file,driver);
                     if(!csss.isEmpty())
                     {
                         getFiles(csss, driver);
@@ -228,12 +227,13 @@ public class FetchUtil
      * @return collection of files to get 
      * @throws IOException if error
      */
-    public static List<String> parseCSS(String source, WebDriver driver) throws IOException
+    public static List<String> parseCSS(File file, WebDriver driver) throws IOException
     {
-        if(source == null)
+        if(file == null)
         {
             throw new RuntimeException("CSS source is required");
         }
+        String source = FileUtils.readFileToString(file);
         StringBuffer sb = new StringBuffer();
         String domain = getHost(driver);
         List<String> files = new ArrayList<String>();
@@ -253,9 +253,10 @@ public class FetchUtil
                     fileSource = fileSource.replaceFirst("/", domain + "/");
                 }
                 files.add(fileSource);
-                matchSrc.appendReplacement(sb, fileSource);
             }
+            matchSrc.appendReplacement(sb, fileSource);
         } 
+        FileUtils.writeStringToFile(file, sb.toString());
         return files;
     }
     /**

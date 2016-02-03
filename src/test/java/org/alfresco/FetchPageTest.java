@@ -233,7 +233,9 @@ public  class FetchPageTest
     @Test
     public void parseCSS() throws IOException
     {
-        List<String> files = FetchUtil.parseCSS(css,driver);
+        File file = new File(FetchUtil.ASSET_DIR + "/my.css");
+        FileUtils.write(file, css);
+        List<String> files = FetchUtil.parseCSS(file,driver);
         Assert.assertEquals(2, files.size());
         Assert.assertEquals("http://cdn-www.alfresco.com/misc/throbber-inactive.png", files.get(0));
         Assert.assertEquals("http://cdn-www.alfresco.com/misc/throbber-active.gif", files.get(1));
@@ -243,12 +245,5 @@ public  class FetchPageTest
     public void parseCSSNull() throws IOException
     {
         FetchUtil.parseCSS(null,driver);
-    }
-    
-    @Test()
-    public void parseCSSEmpty() throws IOException
-    {
-        List<String> files = FetchUtil.parseCSS("",driver);
-        Assert.assertEquals(0, files.size());
     }
 }
