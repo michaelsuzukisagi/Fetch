@@ -1,4 +1,4 @@
-#Selenuim page capture
+#Fetch
 A utility which stores the page as seen by the WebDriver.
 
 ## Features
@@ -10,14 +10,14 @@ Import the project
 ```
 <dependency>
     <groupId>org.alfresco</groupId>
-    <artifactId>savepage</artifactId>
+    <artifactId>fetch</artifactId>
     <version>1.0</version>
 </dependency>
 ```
 ## Usage
 ```
 WebDriver driver = new FireFoxDriver();
-SavePageUtil.save(driver, "mytest.html");
+FetchUtil.save(driver, "mytest.html");
 ```
 To see the html output, open with browser:
 ```

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.alfresco.selenium.SavePageUtil;
+import org.alfresco.selenium.FetchUtil;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -77,26 +77,26 @@ public  class SavePageTest
     public void extractNoContent() throws IOException
     {
         String test = "<head></head>";
-        List<String> list = SavePageUtil.extractFiles(test);
+        List<String> list = FetchUtil.extractFiles(test);
         Assert.assertEquals(0, list.size());
     }
     
     @Test(expected = RuntimeException.class)
     public void extractNullFiles() throws IOException
     {
-        SavePageUtil.extractFiles(null);
+        FetchUtil.extractFiles(null);
     }
     
     @Test(expected = RuntimeException.class)
     public void extractEmptyFiles() throws IOException
     {
-        SavePageUtil.extractFiles("");
+        FetchUtil.extractFiles("");
     }
     
     @Test
     public void extractFiles() throws IOException
     {
-        List<String> list = SavePageUtil.extractFiles(test);
+        List<String> list = FetchUtil.extractFiles(test);
         Assert.assertEquals(7, list.size());
         Assert.assertEquals("/share/res/js/surf/c8f13f59e45dc75460cd02ba9aab801e.js", list.get(0));
         Assert.assertEquals("/test.js", list.get(1));
@@ -110,81 +110,81 @@ public  class SavePageTest
     @Test
     public void parseNullURL() 
     {
-        List<String> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
+        List<String> nullList = FetchUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(0, nullList.size());
     }
     
     @Test
     public void parseEmptyURL() 
     {
-        List<String> nolists = SavePageUtil.parseURL(Collections.emptyList(), "http://localhost:8080/main", "http://localhost:8080");
+        List<String> nolists = FetchUtil.parseURL(Collections.emptyList(), "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(0, nolists.size());
     }
     
     @Test
     public void parseURL() 
     {
-        List<String> files = SavePageUtil.extractFiles(test);
-        List<String> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080");
+        List<String> files = FetchUtil.extractFiles(test);
+        List<String> urls = FetchUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080");
         Assert.assertEquals(7, urls.size());
         Assert.assertEquals("http://localhost:8080/share/proxy/alfresco/api/node/workspace/SpacesStore/99cb2789-f67e-41ff-bea9-505c138a6b23/content/thumbnails/doclib/?c=queue&ph=true&lastModified=2011-03-03T10:31:31.651Z",
                 urls.get(3).toString());
 
-        List<String> urls2 = SavePageUtil.parseURL(files, "http://localhost:8080/main", "http://localhost:8080");
+        List<String> urls2 = FetchUtil.parseURL(files, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(7, urls2.size());
         
-        List<String> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
+        List<String> nullList = FetchUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(0, nullList.size());
     }
     
     @Test(expected = RuntimeException.class)
     public void parseNullDomain()
     {
-        SavePageUtil.parseURL(null, null,"http://localhost:8080");
+        FetchUtil.parseURL(null, null,"http://localhost:8080");
     }
     
     @Test(expected = RuntimeException.class)
     public void parseNullCurrentURL()
     {
-        SavePageUtil.parseURL(null, "http://localhost:8080", null);
+        FetchUtil.parseURL(null, "http://localhost:8080", null);
     }
     
     @Test(expected = RuntimeException.class)
     public void parseEmptyDomain()
     {
-        SavePageUtil.parseURL(null, "","http://localhost:8080");
+        FetchUtil.parseURL(null, "","http://localhost:8080");
     }
     
     @Test(expected = RuntimeException.class)
     public void parseEmptyCurrentUrl()
     {
-        SavePageUtil.parseURL(null, "http://localhost:8080", "");
+        FetchUtil.parseURL(null, "http://localhost:8080", "");
     }
     
     @Test(expected = RuntimeException.class)
     public void getFilesNull() throws IOException
     {
-        SavePageUtil.getFiles(null, driver);
+        FetchUtil.getFiles(null, driver);
     }
     
     @Test
     public void getFilesEmpty() throws IOException
     {
-        SavePageUtil.getFiles(Collections.emptyList(), driver);
+        FetchUtil.getFiles(Collections.emptyList(), driver);
     }
     
     @Test
     public void getFiles() throws IOException
     {
-        File folder = new File(SavePageUtil.ASSET_DIR);
+        File folder = new File(FetchUtil.ASSET_DIR);
         FileUtils.deleteDirectory(folder);
         folder.mkdirs();
         File[] filesInFolder = folder.listFiles();
         int start = filesInFolder.length;
         
-        List<String> files = SavePageUtil.extractFiles(test);
-        List<String> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080/");
-        SavePageUtil.getFiles(urls, driver);
+        List<String> files = FetchUtil.extractFiles(test);
+        List<String> urls = FetchUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080/");
+        FetchUtil.getFiles(urls, driver);
         int end = folder.listFiles().length;
         Assert.assertNotEquals(start, end);
         Assert.assertEquals(7, end);
@@ -193,7 +193,7 @@ public  class SavePageTest
     @Test
     public void getCDN() throws IOException
     {
-        File folder = new File(SavePageUtil.ASSET_DIR);
+        File folder = new File(FetchUtil.ASSET_DIR);
         FileUtils.deleteDirectory(folder);
         folder.mkdirs();
         File[] filesInFolder = folder.listFiles();
@@ -201,7 +201,7 @@ public  class SavePageTest
         
         List<String> files = new ArrayList<String>();
         files.add("https://cdn-www.alfresco.com/sites/www.alfresco.com/files//advagg_css/css__YZMmyCjxADNsxWJVyzxskiYBiPsGboww8DDJoAv1iVA__PqGVjSeXe3e-YM4xspxCavDlyydtEB28TRpZPTEwV5I__-BEWX4mtkwr1skpja3HlI8KN54EGjkcptZCT0YQ6Cjw.css");
-        SavePageUtil.getFiles(files, driver);
+        FetchUtil.getFiles(files, driver);
         
         int end = folder.listFiles().length;
         Assert.assertNotEquals(start, end);
@@ -211,20 +211,20 @@ public  class SavePageTest
     @Test(expected = RuntimeException.class)
     public void parseHTMLNull()
     {
-        SavePageUtil.extractFiles(null);
+        FetchUtil.extractFiles(null);
     }
     
     @Test(expected = RuntimeException.class)
     public void parseHTMLEmpty()
     {
-        SavePageUtil.extractFiles("");
+        FetchUtil.extractFiles("");
     }
     
     @Test
     public void parseHTML()
     {
-        List<String> files = SavePageUtil.extractFiles(test);
-        String html = SavePageUtil.parseHtml(test, files);
+        List<String> files = FetchUtil.extractFiles(test);
+        String html = FetchUtil.parseHtml(test, files);
         Assert.assertNotEquals(test, html);
     }
     

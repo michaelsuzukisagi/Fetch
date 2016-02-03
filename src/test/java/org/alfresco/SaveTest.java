@@ -21,7 +21,7 @@ package org.alfresco;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import org.alfresco.selenium.SavePageUtil;
+import org.alfresco.selenium.FetchUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -90,7 +90,7 @@ public  class SaveTest
     public void saveAlfrescoHomePage() throws IOException
     {
         driver.navigate().to("http://www.alfresco.com");
-        SavePageUtil.save(driver, "alfresco-com.html");
+        FetchUtil.save(driver, "alfresco-com.html");
     }
 //    @Test
 //    public void saveGoogle() throws IOException

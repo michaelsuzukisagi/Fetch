@@ -43,9 +43,7 @@ import org.openqa.selenium.WebDriver;
 
 /**
  * Utility that captures the page for offline use.
- * An alternative to screen shot which allows further inspection of code changes.
- * The implementation class is responsible for storing the html along with 
- * images, js and css.
+ * An alternative to screen shot which allows further inspection of HTML and css code changes.
  * 
  * The proposed default storage structure is:
  * page-nth.html
@@ -54,17 +52,13 @@ import org.openqa.selenium.WebDriver;
  * js  all javascripts imported by the page.
  * <p>
  * Example usage:
- * SavePageUtil.save(driver, name.html)
- * <pre>
- *
- * boolean saved = SavePageUtil.save(driver);
- * </pre>
+ * FetchUtil.save(driver, name.html)
  *
  * @author Michael Suzuki
  */
-public class SavePageUtil
+public class FetchUtil
 {
-    private static final Log logger = LogFactory.getLog(SavePageUtil.class);
+    private static final Log logger = LogFactory.getLog(FetchUtil.class);
     private static final String GET_BASE_URL_JS_COMMAND = "return document.location.origin;";
     private static final String URL_PATH_SEPARATOR = "/";
     /* regex to locate and extract source of all assets */
@@ -200,7 +194,7 @@ public class SavePageUtil
             throw new RuntimeException("Collections of url's are required");
         }
         //Create a client to get content.
-        CloseableHttpClient client = HttpClientScraper.getHttpClient(driver);
+        CloseableHttpClient client = FetchHttpClient.getHttpClient(driver);
         try
         {
             for(String source: files)

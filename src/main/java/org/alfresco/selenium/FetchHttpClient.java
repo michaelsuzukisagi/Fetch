@@ -31,7 +31,7 @@ import org.openqa.selenium.WebDriver;
  *
  * @author Michael Suzuki
  */
-public class HttpClientScraper
+public class FetchHttpClient
 {
     public static CloseableHttpClient getHttpClient(final WebDriver driver)
     {
