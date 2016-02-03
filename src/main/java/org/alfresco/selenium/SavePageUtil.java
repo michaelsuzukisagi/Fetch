@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -69,12 +70,9 @@ import org.openqa.selenium.WebDriver;
  */
 public class SavePageUtil
 {
-    private final static Log logger = LogFactory.getLog(SavePageUtil.class);
+    private static final Log logger = LogFactory.getLog(SavePageUtil.class);
     private static final String GET_BASE_URL_JS_COMMAND = "return document.location.origin;";
     private static final String URL_PATH_SEPARATOR = "/";
-    public static final String OUTPUT_DIR = "./target/public/";
-    public static final String ASSET_FOLDER =  "content/";
-    public static final String ASSET_DIR = OUTPUT_DIR + ASSET_FOLDER;
     /* regex to locate and extract source of all assets */
     private static final Pattern SRC_PATTERN = Pattern.compile("(?<=src=\")[^\"]*(?<!\")");
     private static final Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
@@ -82,6 +80,10 @@ public class SavePageUtil
     private static final Pattern HREF_PATTERN = Pattern.compile("(?<=href=\").*?(?=\")");
     //Required to handle strange characters on the page.
     private static final String UTF8_HTML = "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">";
+    public static final String OUTPUT_DIR = "./target/public/";
+    public static final String ASSET_FOLDER =  "content/";
+    public static final String ASSET_DIR = OUTPUT_DIR + ASSET_FOLDER;
+    
     /**
      * Saves the current page as seen by the WebDriver
      * @param driver {@link WebDriver}
@@ -210,26 +212,33 @@ public class SavePageUtil
         {
             throw new RuntimeException("Collections of url's are required");
         }
-        for(URL source: files)
+        //Create a client to get content.
+        CloseableHttpClient client = getHttpClient(driver);
+        try
         {
-            int index  = source.toString().lastIndexOf(URL_PATH_SEPARATOR);
-            String name = source.toString().substring(index + 1);
-            //Strip ? as it causes problems when its a prefix. 
-            if(name.startsWith("?"))
+            for(URL source: files)
             {
-                name = name.replaceFirst("\\?", "");
+                int index  = source.toString().lastIndexOf(URL_PATH_SEPARATOR);
+                String name = source.toString().substring(index + 1);
+                //Strip ? as it causes problems when its a prefix. 
+                if(name.startsWith("?"))
+                {
+                    name = name.replaceFirst("\\?", "");
+                }
+                File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
+                try
+                {
+                    retrieveFile(source.toString(), client, destination);
+                } 
+                catch (Exception e)
+                {
+                    logger.error("Unable to get file", e);
+                } 
             }
-            File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
-            try
-            {
-                FileUtils.copyURLToFile(source, destination);
-            } 
-            catch (Exception e)
-            {
-                logger.error(e);
-                //Try with HttpClient
-                retrieveFile(source.toString(), driver, destination);
-            } 
+        }
+        finally
+        {
+            HttpClientUtils.closeQuietly(client);
         }
     }
     /**
@@ -288,24 +297,23 @@ public class SavePageUtil
      * @throws IOException if error
      */
     protected static void retrieveFile(final String resourceUrl,
-                                       final WebDriver driver,
+                                       final CloseableHttpClient client,
                                        final File output) throws IOException 
     {
-        BasicCookieStore cookieStore = new BasicCookieStore();
-        cookieStore.addCookie(getSessionCookie(driver));
-        //Create http client to retrieve the file.
-        CloseableHttpClient client = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+        
         HttpGet httpGet = new HttpGet(resourceUrl);
         BufferedOutputStream bos = null;
         BufferedInputStream bis = null;
+        HttpResponse response = null; 
         try 
         {
-            HttpResponse httpResponse = client.execute(httpGet);
-            HttpEntity entity = httpResponse.getEntity();
+            response = client.execute(httpGet);
+            HttpEntity entity = response.getEntity();
             bos = new BufferedOutputStream(new FileOutputStream(output));
             bis = new BufferedInputStream(entity.getContent());
             int inByte;
             while((inByte = bis.read()) != -1) bos.write(inByte);
+            HttpClientUtils.closeQuietly(response);
         }
         catch(Exception e)
         {
@@ -313,6 +321,10 @@ public class SavePageUtil
         }
         finally
         {
+            if(response != null)
+            {
+                HttpClientUtils.closeQuietly(response);
+            }
             if(bis != null)
             {
                 bis.close();
@@ -324,13 +336,20 @@ public class SavePageUtil
         }
     }
 
+    private static CloseableHttpClient getHttpClient(final WebDriver driver)
+    {
+        BasicCookieStore cookieStore = new BasicCookieStore();
+        cookieStore.addCookie(generateSessionCookie(driver));
+        //Create http client to retrieve the file.
+        return HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+    }
     /**
      * Prepare the client cookie based on the authenticated {@link WebDriver} 
      * cookie. 
      * @param driver {@link WebDriver}
      * @return BasicClientCookie with correct credentials.
      */
-    protected static BasicClientCookie getSessionCookie(WebDriver driver)
+    private static BasicClientCookie generateSessionCookie(WebDriver driver)
     {
         Cookie originalCookie = driver.manage().getCookieNamed("JSESSIONID");
         if (originalCookie == null) 
