@@ -23,8 +23,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,7 +96,7 @@ public class SavePageUtil
         String host = (String)((JavascriptExecutor) driver).executeScript(GET_BASE_URL_JS_COMMAND);
         //download all assets: js,img and stylesheet.
         List<String> files = extractFiles(sourceHtml);
-        List<URL> urls = parseURL(files, host, currentUrl); 
+        List<String> urls = parseURL(files, host, currentUrl); 
         getFiles(urls, driver);
         String html = parseHtml(sourceHtml, files);
         File file = new File(OUTPUT_DIR + filename);
@@ -151,7 +149,7 @@ public class SavePageUtil
      * @param currentURL the driver.getCurrentUrl() value 
      * @return Collection of URL
      */
-    public static List<URL> parseURL(List<String> files,final String baseUrl, final String currentURL)
+    public static List<String> parseURL(List<String> files,final String baseUrl, final String currentURL)
     {
         if(null == baseUrl || baseUrl.isEmpty())
         {
@@ -167,35 +165,28 @@ public class SavePageUtil
         }
         //Strip tail "/"
         String base = StringUtils.removeEnd(baseUrl, URL_PATH_SEPARATOR);
-        List<URL> urls = new ArrayList<URL>();
+        List<String> urls = new ArrayList<String>();
         for(String url : files)
         {
             //replace amp&; with &
             url = url.replaceAll("&amp;", "&");
-            try
+            if(!url.startsWith("http"))
             {
-                if(!url.startsWith("http"))
+                if(url.startsWith("."))
                 {
-                    if(url.startsWith("."))
-                    {
-                        String relativePath = url.startsWith("..") ? url.substring(2) : url.substring(1);
-                        urls.add(new URL(currentURL + relativePath));
-                    }
-                    else
-                    {
-                        //Check if / is needed as we striped / from the base url.
-                        String p = url.startsWith(URL_PATH_SEPARATOR) ? base + url : base + URL_PATH_SEPARATOR + url;
-                        urls.add(new URL(p));
-                    }
+                    String relativePath = url.startsWith("..") ? url.substring(2) : url.substring(1);
+                    urls.add(currentURL + relativePath);
                 }
                 else
                 {
-                    urls.add(new URL(url));
+                    //Check if / is needed as we striped / from the base url.
+                    String path = url.startsWith(URL_PATH_SEPARATOR) ? base + url : base + URL_PATH_SEPARATOR + url;
+                    urls.add(path);
                 }
             }
-            catch(MalformedURLException e)
+            else
             {
-                logger.error("Unable to parse url", e);
+                urls.add(url);
             }
         } 
         return urls;
@@ -206,7 +197,7 @@ public class SavePageUtil
      * @param driver {@link WebDriver}
      * @throws IOException 
      */
-    public static void getFiles(List<URL> files, WebDriver driver) throws IOException
+    public static void getFiles(List<String> files, WebDriver driver) throws IOException
     {
         if(null == files)
         {
@@ -216,10 +207,10 @@ public class SavePageUtil
         CloseableHttpClient client = getHttpClient(driver);
         try
         {
-            for(URL source: files)
+            for(String source: files)
             {
-                int index  = source.toString().lastIndexOf(URL_PATH_SEPARATOR);
-                String name = source.toString().substring(index + 1);
+                int index  = source.lastIndexOf(URL_PATH_SEPARATOR);
+                String name = source.substring(index + 1);
                 //Strip ? as it causes problems when its a prefix. 
                 if(name.startsWith("?"))
                 {
@@ -228,7 +219,7 @@ public class SavePageUtil
                 File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
                 try
                 {
-                    retrieveFile(source.toString(), client, destination);
+                    retrieveFile(source, client, destination);
                 } 
                 catch (Exception e)
                 {

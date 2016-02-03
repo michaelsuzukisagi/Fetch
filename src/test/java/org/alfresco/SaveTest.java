@@ -56,46 +56,59 @@ public  class SaveTest
     {
         driver.quit();
     }
-    
+//    
+//    @Test
+//    public void saveFile() throws IOException
+//    {
+//        WebElement input = driver.findElement(By.name("username"));
+//        input.sendKeys("admin");
+//        WebElement password = driver.findElement(By.name("password"));
+//        password.sendKeys("admin");
+//        WebElement button = driver.findElement(By.tagName("button"));
+//        button.click();
+//        WebElement searchInput = driver.findElement(By.id("HEADER_SEARCHBOX_FORM_FIELD"));
+//        SavePageUtil.save(driver, "dashboard.html");
+//        searchInput.sendKeys("ipsum \r\n");
+//        findAndWait(By.id("FCTSRCH_RESULTS_COUNT_LABEL"));
+//        SavePageUtil.save(driver, "faceted-search.html");
+//        driver.navigate().to("http://localhost:8080/share/page/site/swsdp/document-details?nodeRef=workspace://SpacesStore/5515d3e1-bb2a-42ed-833c-52802a367033");
+//        findAndWait(By.id("document-version"));
+//        SavePageUtil.save(driver, "document-details.html");
+//        driver.navigate().to("http://localhost:8080/share/page/site/swsdp/documentlibrary");
+//        findAndWait(By.id("HEADER_SITE_CONFIGURATION_DROPDOWN"));
+//        SavePageUtil.save(driver, "document-library.html");
+//        
+//    }
+//    
+//    @Test
+//    public void saveAlfresco() throws IOException
+//    {
+//        driver.navigate().to(SavePageTest.ALFRESCO_TEST_URL);
+//        SavePageUtil.save(driver, "alfresco.html");
+//    }
     @Test
-    public void saveFile() throws IOException
+    public void saveAlfrescoHomePage() throws IOException
     {
-        WebElement input = driver.findElement(By.name("username"));
-        input.sendKeys("admin");
-        WebElement password = driver.findElement(By.name("password"));
-        password.sendKeys("admin");
-        WebElement button = driver.findElement(By.tagName("button"));
-        button.click();
-        WebElement searchInput = driver.findElement(By.id("HEADER_SEARCHBOX_FORM_FIELD"));
-        searchInput.sendKeys("ipsum \r\n");
-        findAndWait(By.id("FCTSRCH_RESULTS_COUNT_LABEL"), 3000, 100);
-        SavePageUtil.save(driver, "mytest.html");
+        driver.navigate().to("http://www.alfresco.com");
+        SavePageUtil.save(driver, "alfresco-com.html");
     }
-    
-    @Test
-    public void saveAlfresco() throws IOException
-    {
-        driver.navigate().to(SavePageTest.ALFRESCO_TEST_URL);
-        SavePageUtil.save(driver, "alfresco.html");
-    }
-  
-    @Test
-    public void saveGoogle() throws IOException
-    {
-        driver.navigate().to("http://www.google.com");
-        SavePageUtil.save(driver, "google.html");
-    }
-    @Test
-    public void saveGitHub() throws IOException
-    {
-        driver.navigate().to("http://www.github.com");
-        SavePageUtil.save(driver, "github.html");
-    }
-    public WebElement findAndWait(final By by, final long limit, final long interval)
+//    @Test
+//    public void saveGoogle() throws IOException
+//    {
+//        driver.navigate().to("http://www.google.com");
+//        SavePageUtil.save(driver, "google.html");
+//    }
+//    @Test
+//    public void saveGitHub() throws IOException
+//    {
+//        driver.navigate().to("http://www.github.com");
+//        SavePageUtil.save(driver, "github.html");
+//    }
+    public WebElement findAndWait(final By by)
     {
         FluentWait<By> fluentWait = new FluentWait<By>(by);
-        fluentWait.pollingEvery(interval, TimeUnit.MILLISECONDS);
-        fluentWait.withTimeout(limit, TimeUnit.MILLISECONDS);
+        fluentWait.pollingEvery(100, TimeUnit.MILLISECONDS);
+        fluentWait.withTimeout(5000, TimeUnit.MILLISECONDS);
         try
         {
             fluentWait.until(new Predicate<By>()

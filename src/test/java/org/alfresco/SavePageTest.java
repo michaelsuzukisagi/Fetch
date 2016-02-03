@@ -20,7 +20,6 @@ package org.alfresco;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -111,14 +110,14 @@ public  class SavePageTest
     @Test
     public void parseNullURL() 
     {
-        List<URL> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
+        List<String> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(0, nullList.size());
     }
     
     @Test
     public void parseEmptyURL() 
     {
-        List<URL> nolists = SavePageUtil.parseURL(Collections.emptyList(), "http://localhost:8080/main", "http://localhost:8080");
+        List<String> nolists = SavePageUtil.parseURL(Collections.emptyList(), "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(0, nolists.size());
     }
     
@@ -126,15 +125,15 @@ public  class SavePageTest
     public void parseURL() 
     {
         List<String> files = SavePageUtil.extractFiles(test);
-        List<URL> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080");
+        List<String> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080");
         Assert.assertEquals(7, urls.size());
         Assert.assertEquals("http://localhost:8080/share/proxy/alfresco/api/node/workspace/SpacesStore/99cb2789-f67e-41ff-bea9-505c138a6b23/content/thumbnails/doclib/?c=queue&ph=true&lastModified=2011-03-03T10:31:31.651Z",
                 urls.get(3).toString());
 
-        List<URL> urls2 = SavePageUtil.parseURL(files, "http://localhost:8080/main", "http://localhost:8080");
+        List<String> urls2 = SavePageUtil.parseURL(files, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(7, urls2.size());
         
-        List<URL> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
+        List<String> nullList = SavePageUtil.parseURL(null, "http://localhost:8080/main", "http://localhost:8080");
         Assert.assertEquals(0, nullList.size());
     }
     
@@ -184,7 +183,7 @@ public  class SavePageTest
         int start = filesInFolder.length;
         
         List<String> files = SavePageUtil.extractFiles(test);
-        List<URL> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080/");
+        List<String> urls = SavePageUtil.parseURL(files, "http://localhost:8080/", "http://localhost:8080/");
         SavePageUtil.getFiles(urls, driver);
         int end = folder.listFiles().length;
         Assert.assertNotEquals(start, end);
@@ -200,8 +199,8 @@ public  class SavePageTest
         File[] filesInFolder = folder.listFiles();
         int start = filesInFolder.length;
         
-        List<URL> files = new ArrayList<URL>();
-        files.add(new URL("https://cdn-www.alfresco.com/sites/www.alfresco.com/files//advagg_css/css__YZMmyCjxADNsxWJVyzxskiYBiPsGboww8DDJoAv1iVA__PqGVjSeXe3e-YM4xspxCavDlyydtEB28TRpZPTEwV5I__-BEWX4mtkwr1skpja3HlI8KN54EGjkcptZCT0YQ6Cjw.css"));
+        List<String> files = new ArrayList<String>();
+        files.add("https://cdn-www.alfresco.com/sites/www.alfresco.com/files//advagg_css/css__YZMmyCjxADNsxWJVyzxskiYBiPsGboww8DDJoAv1iVA__PqGVjSeXe3e-YM4xspxCavDlyydtEB28TRpZPTEwV5I__-BEWX4mtkwr1skpja3HlI8KN54EGjkcptZCT0YQ6Cjw.css");
         SavePageUtil.getFiles(files, driver);
         
         int end = folder.listFiles().length;
