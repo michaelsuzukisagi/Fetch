@@ -210,7 +210,6 @@ public class FetchUtil
                     if(!csss.isEmpty())
                     {
                         getFiles(csss, driver);
-//                        updateCss(csss, source);
                     }
                 }
             }
@@ -274,10 +273,6 @@ public class FetchUtil
         if(name.startsWith("?"))
         {
             name = name.replaceFirst("\\?", "");
-        }
-        if(name.startsWith("/"))
-        {
-            System.out.println("We got one!!!");
         }
         File target = new File(ASSET_DIR);
         if(!target.exists()) 
