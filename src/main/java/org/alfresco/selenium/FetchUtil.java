@@ -255,7 +255,15 @@ public class FetchUtil
             }
             matchSrc.appendReplacement(sb, fileSource);
         } 
-        FileUtils.writeStringToFile(file, sb.toString());
+        //Check if css needs updating or to use original source.
+        if(sb.length() < 1)
+        {
+            FileUtils.writeStringToFile(file, source);
+        }
+        else
+        {
+            FileUtils.writeStringToFile(file, sb.toString());
+        }
         return files;
     }
     /**

@@ -56,58 +56,58 @@ public  class FetchTest
     {
         driver.quit();
     }
-//    
-//    @Test
-//    public void saveFile() throws IOException
-//    {
-//        WebElement input = driver.findElement(By.name("username"));
-//        input.sendKeys("admin");
-//        WebElement password = driver.findElement(By.name("password"));
-//        password.sendKeys("admin");
-//        WebElement button = driver.findElement(By.tagName("button"));
-//        button.click();
-//        WebElement searchInput = driver.findElement(By.id("HEADER_SEARCHBOX_FORM_FIELD"));
-//        FetchUtil.save(driver, "dashboard.html");
-//        searchInput.sendKeys("ipsum \r\n");
-//        findAndWait(By.id("FCTSRCH_RESULTS_COUNT_LABEL"));
-//        FetchUtil.save(driver, "faceted-search.html");
-//        driver.navigate().to("http://localhost:8080/share/page/site/swsdp/document-details?nodeRef=workspace://SpacesStore/5515d3e1-bb2a-42ed-833c-52802a367033");
-//        findAndWait(By.id("document-version"));
-//        FetchUtil.save(driver, "document-details.html");
-//        driver.navigate().to("http://localhost:8080/share/page/site/swsdp/documentlibrary");
-//        findAndWait(By.id("HEADER_SITE_CONFIGURATION_DROPDOWN"));
-//        FetchUtil.save(driver, "document-library.html");
-//    }
-//    
-//    @Test
-//    public void saveAlfresco() throws IOException
-//    {
-//        driver.navigate().to(FetchUtil.ALFRESCO_TEST_URL);
-//        FetchUtil.save(driver, "alfresco.html");
-//    }
+    
+    @Test
+    public void saveFile() throws IOException
+    {
+        WebElement input = driver.findElement(By.name("username"));
+        input.sendKeys("admin");
+        WebElement password = driver.findElement(By.name("password"));
+        password.sendKeys("admin");
+        WebElement button = driver.findElement(By.tagName("button"));
+        button.click();
+        WebElement searchInput = driver.findElement(By.id("HEADER_SEARCHBOX_FORM_FIELD"));
+        FetchUtil.save(driver, "dashboard.html");
+        searchInput.sendKeys("ipsum \r\n");
+        findAndWait(By.id("FCTSRCH_RESULTS_COUNT_LABEL"));
+        FetchUtil.save(driver, "faceted-search.html");
+        driver.navigate().to("http://localhost:8080/share/page/site/swsdp/document-details?nodeRef=workspace://SpacesStore/5515d3e1-bb2a-42ed-833c-52802a367033");
+        findAndWait(By.id("document-version"));
+        FetchUtil.save(driver, "document-details.html");
+        driver.navigate().to("http://localhost:8080/share/page/site/swsdp/documentlibrary");
+        findAndWait(By.id("HEADER_SITE_CONFIGURATION_DROPDOWN"));
+        FetchUtil.save(driver, "document-library.html");
+    }
+    
+    @Test
+    public void saveAlfresco() throws IOException
+    {
+        driver.navigate().to(FetchPageTest.ALFRESCO_TEST_URL);
+        FetchUtil.save(driver, "alfresco.html");
+    }
     @Test
     public void saveAlfrescoHomePage() throws IOException
     {
         driver.navigate().to("http://www.alfresco.com");
         FetchUtil.save(driver, "alfresco-com.html");
     }
-//    @Test
-//    public void saveGoogle() throws IOException
-//    {
-//        driver.navigate().to("http://www.google.com");
-//        FetchUtil.save(driver, "google.html");
-//    }
+    @Test
+    public void saveGoogle() throws IOException
+    {
+        driver.navigate().to("http://www.google.com");
+        FetchUtil.save(driver, "google.html");
+    }
+    @Test
+    public void saveGitHub() throws IOException
+    {
+        driver.navigate().to("http://www.github.com");
+        FetchUtil.save(driver, "github.html");
+    }
 //    @Test
 //    public void saveBBC() throws IOException
 //    {
 //        driver.navigate().to("bbc");
 //        FetchUtil.save(driver, "bbc.html");
-//    }
-//    @Test
-//    public void saveGitHub() throws IOException
-//    {
-//        driver.navigate().to("http://www.github.com");
-//        SavePageUtil.save(driver, "github.html");
 //    }
     public WebElement findAndWait(final By by)
     {
