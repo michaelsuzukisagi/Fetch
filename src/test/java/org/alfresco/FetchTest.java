@@ -92,6 +92,12 @@ public  class FetchTest
         FetchUtil.save(driver, "alfresco-com.html");
     }
     @Test
+    public void saveAlfrescoDocs() throws IOException
+    {
+        driver.navigate().to("http://docs.alfresco.com/print/book/export/html/789712");
+        FetchUtil.save(driver, "alfresco-d.html");
+    }
+    @Test
     public void saveGoogle() throws IOException
     {
         driver.navigate().to("http://www.google.com");
@@ -101,6 +107,8 @@ public  class FetchTest
     public void saveGitHub() throws IOException
     {
         driver.navigate().to("http://www.github.com");
+        findAndWait(By.cssSelector("a.header-logo-wordmark"));
+        
         FetchUtil.save(driver, "github.html");
     }
 //    @Test

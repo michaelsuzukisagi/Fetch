@@ -206,11 +206,7 @@ public class FetchUtil
                 File file = getFile(source, client);
                 if(source.endsWith("css"))
                 {
-                    List<String> csss = parseCSS(file,driver);
-                    if(!csss.isEmpty())
-                    {
-                        getFiles(csss, driver);
-                    }
+                    getCSSFiles(file, driver);
                 }
             }
         }
@@ -219,52 +215,82 @@ public class FetchUtil
             HttpClientUtils.closeQuietly(client);
         }
     }
-
     /**
      * Extract additional content found in css.
      * @param source css 
      * @return collection of files to get 
      * @throws IOException if error
      */
-    public static List<String> parseCSS(File file, WebDriver driver) throws IOException
+    public static void getCSSFiles(File file, WebDriver driver) throws IOException
     {
         if(file == null)
         {
             throw new RuntimeException("CSS source is required");
         }
         String source = FileUtils.readFileToString(file);
-        StringBuffer sb = new StringBuffer();
+        source = source.replaceAll("}", "}\n");
         String domain = getHost(driver);
-        List<String> files = new ArrayList<String>();
-        Matcher matchSrc = CSS_BACKGOUND_IMG_PATTERN.matcher(source);
-        while (matchSrc.find()) 
+        CloseableHttpClient client = FetchHttpClient.getHttpClient(driver);
+        StringBuffer sb = new StringBuffer();
+        try
         {
-            String fileSource = matchSrc.group(0);
-            fileSource = fileSource.replaceAll("\"", "");
-            if(!fileSource.startsWith("data:image"))
+            //Extract all source files
+            Matcher matchSrc = CSS_BACKGOUND_IMG_PATTERN.matcher(source);
+            while (matchSrc.find()) 
             {
-                if(fileSource.startsWith("//"))
+                //Change extracted source file to absolute urls 
+                String fileSourceOri = matchSrc.group(0);
+                String fileSource = fileSourceOri.replaceAll("\"", "");
+                if(!fileSource.startsWith("data:image"))
                 {
-                    fileSource = fileSource.replace("//", "http://");
+                    if(fileSource.startsWith("//"))
+                    {
+                        fileSource = fileSource.replace("//", "http://");
+                    }
+                    else if(fileSource.startsWith("/"))
+                    {
+                        fileSource = fileSource.replaceFirst("/", domain + "/");
+                    }
+                    //Add to collection of paths for downloading
+                    getCssFile(fileSource,fileSourceOri, client);
                 }
-                else if(fileSource.startsWith("/"))
+                //Amend path to point to file in the same directory
+                if(!fileSourceOri.startsWith("//") || fileSourceOri.startsWith("\"/"))
                 {
-                    fileSource = fileSource.replaceFirst("/", domain + "/");
+                    String t = fileSourceOri.replaceFirst("\"/", "\"");
+                    matchSrc.appendReplacement(sb, t);
                 }
-                files.add(fileSource);
+                else
+                {
+                    
+                    matchSrc.appendReplacement(sb, fileSourceOri);
+                }
+            } 
+            if(sb.length() < 1) 
+            {
+                FileUtils.writeStringToFile(file, source);
             }
-            matchSrc.appendReplacement(sb, fileSource);
-        } 
-        //Check if css needs updating or to use original source.
-        if(sb.length() < 1)
-        {
-            FileUtils.writeStringToFile(file, source);
+            else
+            {
+                FileUtils.writeStringToFile(file, sb.toString());
+            }
+        
         }
-        else
+        finally
         {
-            FileUtils.writeStringToFile(file, sb.toString());
+            HttpClientUtils.closeQuietly(client);
         }
-        return files;
+
+    }
+    /**
+     * Gets the name from path
+     * @param source the path to file
+     * @return String name of file
+     */
+    private static String getName(final String source)
+    {
+        int index  = source.lastIndexOf(URL_PATH_SEPARATOR);
+        return source.substring(index + 1);
     }
     /**
      * Gets the external file using http client.
@@ -275,9 +301,8 @@ public class FetchUtil
      */
     private static File getFile(final String source, final CloseableHttpClient client) throws IOException
     {
-        int index  = source.lastIndexOf(URL_PATH_SEPARATOR);
-        String name = source.substring(index + 1);
-        //Strip ? as it causes problems when its a prefix. 
+        String name = getName(source);
+        //Strip ? as it causes regex problems when its a prefix. 
         if(name.startsWith("?"))
         {
             name = name.replaceFirst("\\?", "");
@@ -289,6 +314,29 @@ public class FetchUtil
         }
         File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
         return retrieveFile(source, client, destination);
+    }
+    /**
+     * Gets the external file using http client and stores the css and 
+     * directory layout to content.
+     * @param source file name
+     * @param client {@link CloseableHttpClient}
+     * @return {@link File} output.
+     * @throws IOException if error
+     */
+    private static File getCssFile(final String sourceURL, final String filePath,
+            final CloseableHttpClient client) throws IOException
+    {
+        String source = filePath.replaceAll("\"", "");
+        int index  = source.lastIndexOf(URL_PATH_SEPARATOR);
+        String path = source.substring(0,index);
+        String name = source.substring(index);
+        File target = new File(ASSET_DIR + path);
+        if(!target.exists()) 
+        {
+            target.mkdirs();
+        }
+        File out = new File(ASSET_DIR + path + name);
+        return retrieveFile(sourceURL, client, out);
     }
     /**
      * Updates the HTML with the new locations of assets.
