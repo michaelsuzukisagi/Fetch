@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.alfresco.selenium.FetchCSS;
 import org.alfresco.selenium.FetchUtil;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
@@ -237,13 +238,13 @@ public  class FetchPageTest
         Assert.assertEquals(0, assetDir.listFiles().length);
         File file = new File(FetchUtil.ASSET_DIR + "/my.css");
         FileUtils.write(file, css);
-        FetchUtil.getCSSFiles(file,driver);
+        FetchCSS.getCSSFiles(file,driver);
         Assert.assertEquals(2, assetDir.listFiles().length);
     }
     
     @Test(expected=RuntimeException.class)
     public void parseCSSNull() throws IOException
     {
-        FetchUtil.getCSSFiles(null,driver);
+        FetchCSS.getCSSFiles(null,driver);
     }
 }

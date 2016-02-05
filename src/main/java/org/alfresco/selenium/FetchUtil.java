@@ -65,7 +65,7 @@ public class FetchUtil
     private static final Pattern SRC_PATTERN = Pattern.compile("(?<=src=\")[^\"]*(?<!\")");
     private static final Pattern CSS_PATTERN = Pattern.compile("(?<=url\\(\").*?(?=\"\\))");
     private static final Pattern CSS_LINK_PATTERN = Pattern.compile("<link.*?\\>");
-    private static final Pattern CSS_BACKGOUND_IMG_PATTERN = Pattern.compile("(?<=background-image:url\\().*?(?=\\))");
+    
     private static final Pattern HREF_PATTERN = Pattern.compile("(?<=href=\").*?(?=\")");
     //Required to handle strange characters on the page.
     private static final String UTF8_HTML = "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">";
@@ -206,7 +206,7 @@ public class FetchUtil
                 File file = getFile(source, client);
                 if(source.endsWith("css"))
                 {
-                    getCSSFiles(file, driver);
+                    FetchCSS.getCSSFiles(file, driver);
                 }
             }
         }
@@ -214,73 +214,6 @@ public class FetchUtil
         {
             HttpClientUtils.closeQuietly(client);
         }
-    }
-    /**
-     * Extract additional content found in css.
-     * @param source css 
-     * @return collection of files to get 
-     * @throws IOException if error
-     */
-    public static void getCSSFiles(File file, WebDriver driver) throws IOException
-    {
-        if(file == null)
-        {
-            throw new RuntimeException("CSS source is required");
-        }
-        String source = FileUtils.readFileToString(file);
-        source = source.replaceAll("}", "}\n");
-        String domain = getHost(driver);
-        CloseableHttpClient client = FetchHttpClient.getHttpClient(driver);
-        StringBuffer sb = new StringBuffer();
-        try
-        {
-            //Extract all source files
-            Matcher matchSrc = CSS_BACKGOUND_IMG_PATTERN.matcher(source);
-            while (matchSrc.find()) 
-            {
-                //Change extracted source file to absolute urls 
-                String fileSourceOri = matchSrc.group(0);
-                String fileSource = fileSourceOri.replaceAll("\"", "");
-                if(!fileSource.startsWith("data:image"))
-                {
-                    if(fileSource.startsWith("//"))
-                    {
-                        fileSource = fileSource.replace("//", "http://");
-                    }
-                    else if(fileSource.startsWith("/"))
-                    {
-                        fileSource = fileSource.replaceFirst("/", domain + "/");
-                    }
-                    //Add to collection of paths for downloading
-                    getCssFile(fileSource,fileSourceOri, client);
-                }
-                //Amend path to point to file in the same directory
-                if(!fileSourceOri.startsWith("//") || fileSourceOri.startsWith("\"/"))
-                {
-                    String t = fileSourceOri.replaceFirst("\"/", "\"");
-                    matchSrc.appendReplacement(sb, t);
-                }
-                else
-                {
-                    
-                    matchSrc.appendReplacement(sb, fileSourceOri);
-                }
-            } 
-            if(sb.length() < 1) 
-            {
-                FileUtils.writeStringToFile(file, source);
-            }
-            else
-            {
-                FileUtils.writeStringToFile(file, sb.toString());
-            }
-        
-        }
-        finally
-        {
-            HttpClientUtils.closeQuietly(client);
-        }
-
     }
     /**
      * Gets the name from path
@@ -314,29 +247,6 @@ public class FetchUtil
         }
         File destination = new File(ASSET_DIR + URL_PATH_SEPARATOR + name);
         return retrieveFile(source, client, destination);
-    }
-    /**
-     * Gets the external file using http client and stores the css and 
-     * directory layout to content.
-     * @param source file name
-     * @param client {@link CloseableHttpClient}
-     * @return {@link File} output.
-     * @throws IOException if error
-     */
-    private static File getCssFile(final String sourceURL, final String filePath,
-            final CloseableHttpClient client) throws IOException
-    {
-        String source = filePath.replaceAll("\"", "");
-        int index  = source.lastIndexOf(URL_PATH_SEPARATOR);
-        String path = source.substring(0,index);
-        String name = source.substring(index);
-        File target = new File(ASSET_DIR + path);
-        if(!target.exists()) 
-        {
-            target.mkdirs();
-        }
-        File out = new File(ASSET_DIR + path + name);
-        return retrieveFile(sourceURL, client, out);
     }
     /**
      * Updates the HTML with the new locations of assets.
