@@ -219,7 +219,6 @@ public  class FetchPageTest
     {
         FetchUtil.extractFiles("");
     }
-    
     @Test
     public void parseHTML()
     {
@@ -229,17 +228,18 @@ public  class FetchPageTest
     }
     
     String css = "html.js input.form-autocomplete{background-image:url(//cdn-www.alfresco.com/misc/throbber-inactive.png);background-position:100% center;background-repeat:no-repeat;}html.js input.throbbing{background-image:url(//cdn-www.alfresco.com/misc/throbber-active.gif);background-position:100% center;";
-//TODO  
-//    @Test
-//    public void parseCSS() throws IOException
-//    {
-//        File file = new File(FetchUtil.ASSET_DIR + "/my.css");
-//        FileUtils.write(file, css);
-//        FetchUtil.getCSSFiles(file,driver);
-//        Assert.assertEquals(2, files.size());
-//        Assert.assertEquals("http://cdn-www.alfresco.com/misc/throbber-inactive.png", files.get(0));
-//        Assert.assertEquals("http://cdn-www.alfresco.com/misc/throbber-active.gif", files.get(1));
-//    }
+    @Test
+    public void parseCSS() throws IOException
+    {
+        File assetDir = new File(FetchUtil.ASSET_DIR);
+        FileUtils.deleteDirectory(assetDir);
+        assetDir.mkdirs();
+        Assert.assertEquals(0, assetDir.listFiles().length);
+        File file = new File(FetchUtil.ASSET_DIR + "/my.css");
+        FileUtils.write(file, css);
+        FetchUtil.getCSSFiles(file,driver);
+        Assert.assertEquals(2, assetDir.listFiles().length);
+    }
     
     @Test(expected=RuntimeException.class)
     public void parseCSSNull() throws IOException
