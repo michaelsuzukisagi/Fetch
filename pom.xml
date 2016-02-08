@@ -15,6 +15,12 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+    <scm>
+        <connection>scm:git:https://github.com/michaelsuzukisagi/Fetch.git</connection>
+        <url>https://github.com/michaelsuzukisagi/Fetch</url>
+        <developerConnection>scm:git:https://github.com/michaelsuzukisagi/Fetch.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -45,6 +51,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>alfresco-internal</id>
+            <name>Alfresco Releases Repository</name>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>alfresco-internal-snapshots</id>
+            <name>Alfresco Snapshots Repository </name>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
     <build>
         <plugins>
             <plugin>
