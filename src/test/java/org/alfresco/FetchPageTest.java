@@ -252,10 +252,12 @@ public  class FetchPageTest
     public void stripBaseTag()
     {
         String html = "<html><head><base href=\"http://docs.alfresco.com/5.0/concepts/install-singleinstance.html\" /></head><body>base</body></html>";
+        String expected = "<html><head></head><body>base</body></html>";
         String result = FetchUtil.stripBaseTag(html);
         Assert.assertNotNull(result);
         Assert.assertNotEquals(result,html);
         Assert.assertFalse(result.contains("<base"));
+        Assert.assertEquals(expected, result);
     }
     @Test
     public void handleNonExistentBaseTag()

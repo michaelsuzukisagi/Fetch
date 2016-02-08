@@ -262,6 +262,7 @@ public class FetchUtil
         }
         String value = html.substring(0);
         value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);
+        value = stripBaseTag(value);
         if(files != null)
         {
             for(String file : files)
@@ -344,23 +345,20 @@ public class FetchUtil
         return output;
     }
     private static final Pattern BASE_TAG = Pattern.compile("<base.*?\\>");
+    /**
+     * Checks and removes base tags such as:
+     * <base href= />
+     * @param value HTML source
+     * @return
+     */
     public static String stripBaseTag(String value)
     {
         if(null == value)
         {
             throw new IllegalArgumentException("input required");
         }
-        StringBuffer sb = new StringBuffer();
         //Extract all source files
         Matcher matchSrc = BASE_TAG.matcher(value);
-        while (matchSrc.find()) 
-        {
-            matchSrc.appendReplacement(sb, "");
-        }
-        if(sb.length() < 1)
-        {
-            return value;
-        }
-        return sb.toString();
+        return matchSrc.replaceFirst("");
     }
 }
