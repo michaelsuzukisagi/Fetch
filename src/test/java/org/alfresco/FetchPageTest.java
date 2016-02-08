@@ -82,13 +82,13 @@ public  class FetchPageTest
         Assert.assertEquals(0, list.size());
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void extractNullFiles() throws IOException
     {
         FetchUtil.extractFiles(null);
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void extractEmptyFiles() throws IOException
     {
         FetchUtil.extractFiles("");
@@ -138,31 +138,31 @@ public  class FetchPageTest
         Assert.assertEquals(0, nullList.size());
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void parseNullDomain()
     {
         FetchUtil.parseURL(null, null,"http://localhost:8080");
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void parseNullCurrentURL()
     {
         FetchUtil.parseURL(null, "http://localhost:8080", null);
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void parseEmptyDomain()
     {
         FetchUtil.parseURL(null, "","http://localhost:8080");
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void parseEmptyCurrentUrl()
     {
         FetchUtil.parseURL(null, "http://localhost:8080", "");
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void getFilesNull() throws IOException
     {
         FetchUtil.getFiles(null, driver);
@@ -209,13 +209,13 @@ public  class FetchPageTest
         Assert.assertEquals(2, end);
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void parseHTMLNull()
     {
         FetchUtil.extractFiles(null);
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void parseHTMLEmpty()
     {
         FetchUtil.extractFiles("");
@@ -242,7 +242,7 @@ public  class FetchPageTest
         Assert.assertEquals(2, assetDir.listFiles().length);
     }
     
-    @Test(expected=RuntimeException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void parseCSSNull() throws IOException
     {
         FetchCSS.getCSSFiles(null,driver);

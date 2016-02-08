@@ -107,7 +107,7 @@ public class FetchUtil
     {
         if(html == null || html.isEmpty())
         {
-            throw new RuntimeException("HTML source input required");
+            throw new IllegalArgumentException("HTML source input required");
         }
         List<String> list = new ArrayList<String>();
         //Find all src=
@@ -147,11 +147,11 @@ public class FetchUtil
     {
         if(null == baseUrl || baseUrl.isEmpty())
         {
-            throw new RuntimeException("Site domain url is required");
+            throw new IllegalArgumentException("Site domain url is required");
         }
         if(null == currentURL || currentURL.isEmpty())
         {
-            throw new RuntimeException("Current WebDriver url is required");
+            throw new IllegalArgumentException("Current WebDriver url is required");
         }
         if(files == null || files.isEmpty())
         {
@@ -195,7 +195,7 @@ public class FetchUtil
     {
         if(null == files)
         {
-            throw new RuntimeException("Collections of url's are required");
+            throw new IllegalArgumentException("Collections of url's are required");
         }
         //Create a client to get content.
         CloseableHttpClient client = FetchHttpClient.getHttpClient(driver);
@@ -258,7 +258,7 @@ public class FetchUtil
     {
         if(html == null || html.isEmpty())
         {
-            throw new RuntimeException("Html source code is required");
+            throw new IllegalArgumentException("Html source code is required");
         }
         String value = html.substring(0);
         value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);

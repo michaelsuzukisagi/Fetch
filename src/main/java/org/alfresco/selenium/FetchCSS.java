@@ -51,7 +51,7 @@ public class FetchCSS extends FetchUtil
     {
         if(file == null)
         {
-            throw new RuntimeException("CSS source is required");
+            throw new IllegalArgumentException("CSS source is required");
         }
         String source = FileUtils.readFileToString(file);
         source = source.replaceAll("}", "}\n");
