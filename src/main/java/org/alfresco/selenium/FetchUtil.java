@@ -343,4 +343,24 @@ public class FetchUtil
         }
         return output;
     }
+    private static final Pattern BASE_TAG = Pattern.compile("<base.*?\\>");
+    public static String stripBaseTag(String value)
+    {
+        if(null == value)
+        {
+            throw new IllegalArgumentException("input required");
+        }
+        StringBuffer sb = new StringBuffer();
+        //Extract all source files
+        Matcher matchSrc = BASE_TAG.matcher(value);
+        while (matchSrc.find()) 
+        {
+            matchSrc.appendReplacement(sb, "");
+        }
+        if(sb.length() < 1)
+        {
+            return value;
+        }
+        return sb.toString();
+    }
 }

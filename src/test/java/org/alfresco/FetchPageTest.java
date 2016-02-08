@@ -247,4 +247,22 @@ public  class FetchPageTest
     {
         FetchCSS.getCSSFiles(null,driver);
     }
+    
+    @Test
+    public void stripBaseTag()
+    {
+        String html = "<html><head><base href=\"http://docs.alfresco.com/5.0/concepts/install-singleinstance.html\" /></head><body>base</body></html>";
+        String result = FetchUtil.stripBaseTag(html);
+        Assert.assertNotNull(result);
+        Assert.assertNotEquals(result,html);
+        Assert.assertFalse(result.contains("<base"));
+    }
+    @Test
+    public void handleNonExistentBaseTag()
+    {
+        String html = " <html><head></head><body>base</body></html>";
+        String result = FetchUtil.stripBaseTag(html);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result,html);
+    }
 }
