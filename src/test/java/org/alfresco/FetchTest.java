@@ -48,7 +48,7 @@ public  class FetchTest
     public static void setup()
     {
         driver = new FirefoxDriver();
-        driver.navigate().to(FetchPageTest.SHARE_TEST_URL);
+        driver.navigate().to(AbstractTest.SHARE_TEST_URL);
     }
     
     @AfterClass
@@ -82,7 +82,7 @@ public  class FetchTest
     @Test
     public void saveAlfresco() throws IOException
     {
-        driver.navigate().to(FetchPageTest.ALFRESCO_TEST_URL);
+        driver.navigate().to(AbstractTest.ALFRESCO_TEST_URL);
         FetchUtil.save(driver, "alfresco.html");
     }
     @Test
@@ -98,25 +98,38 @@ public  class FetchTest
         FetchUtil.save(driver, "alfresco-d.html");
     }
     @Test
-    public void saveGoogle() throws IOException
+    public void saveJira() throws IOException
     {
-        driver.navigate().to("http://www.google.com");
-        FetchUtil.save(driver, "google.html");
+        driver.navigate().to("https://issues.alfresco.com/jira/browse/MNT-11744 ");
+        WebElement input = findAndWait(By.id("login-form-username"));
+        input.sendKeys("msuzuki");
+        WebElement password = findAndWait(By.id("login-form-password"));
+        password.sendKeys("nBGxi584");
+        WebElement btn = findAndWait(By.id("login-form-submit"));
+        btn.click();
+        findAndWait(By.id("summary-val"));
+        FetchUtil.save(driver, "jira.html");
     }
+        @Test
+        public void saveGoogle() throws IOException
+        {
+            driver.navigate().to("http://www.google.com");
+            FetchUtil.save(driver, "google.html");
+        }
+        @Test
+        public void saveGitHub() throws IOException
+        {
+            driver.navigate().to("http://www.github.com");
+            findAndWait(By.cssSelector("a.header-logo-wordmark"));
+            
+            FetchUtil.save(driver, "github.html");
+        }
     @Test
-    public void saveGitHub() throws IOException
+    public void saveBBC() throws IOException
     {
-        driver.navigate().to("http://www.github.com");
-        findAndWait(By.cssSelector("a.header-logo-wordmark"));
-        
-        FetchUtil.save(driver, "github.html");
+        driver.navigate().to("bbc");
+        FetchUtil.save(driver, "bbc.html");
     }
-//    @Test
-//    public void saveBBC() throws IOException
-//    {
-//        driver.navigate().to("bbc");
-//        FetchUtil.save(driver, "bbc.html");
-//    }
     public WebElement findAndWait(final By by)
     {
         FluentWait<By> fluentWait = new FluentWait<By>(by);

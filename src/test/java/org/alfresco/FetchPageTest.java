@@ -24,21 +24,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.alfresco.selenium.FetchCSS;
 import org.alfresco.selenium.FetchUtil;
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 
 
 /**
- * Tests the save function against different web sites.
- * @author Michael Suzuki
+ * Tests FetchUtil save page functionality.
+ * Validates that it is able to get html source code,
+ * parse, download media content, edit source code and save to file.
  * 
+ * @author Michael Suzuki
  */
 public  class FetchPageTest
 {
@@ -57,23 +55,6 @@ public  class FetchPageTest
             + "<img src=\"/share/res/components/images/lightbox/loading.gif\">"
             +"<img class=\"alfresco-renderers-Thumbnail__image\" data-dojo-attach-point=\"imgNode\" id=\"workspace://SpacesStore/99cb2789-f67e-41ff-bea9-505c138a6b23\" src=\"http://localhost:8080/share/proxy/alfresco/api/node/workspace/SpacesStore/99cb2789-f67e-41ff-bea9-505c138a6b23/content/thumbnails/doclib/?c=queue&amp;ph=true&amp;lastModified=2011-03-03T10:31:31.651Z\" alt=\".ppt\" title=\"Project Overview.ppt\" data-dojo-attach-event=\"onload:getNaturalImageSize\">"
             + "</div></body>";
-            
-    protected final static String ALFRESCO_TEST_URL = "http://localhost:8080/alfresco";
-    protected final static String SHARE_TEST_URL = "http://localhost:8080/share";
-    
-    @BeforeClass
-    public static void setup()
-    {
-        driver = new FirefoxDriver();
-        driver.navigate().to(SHARE_TEST_URL);
-    }
-    
-    @AfterClass
-    public static void clean()
-    {
-        driver.quit();
-    }
-    
     @Test
     public void extractNoContent() throws IOException
     {
@@ -227,26 +208,7 @@ public  class FetchPageTest
         String html = FetchUtil.parseHtml(test, files);
         Assert.assertNotEquals(test, html);
     }
-    
-    String css = "html.js input.form-autocomplete{background-image:url(//cdn-www.alfresco.com/misc/throbber-inactive.png);background-position:100% center;background-repeat:no-repeat;}html.js input.throbbing{background-image:url(//cdn-www.alfresco.com/misc/throbber-active.gif);background-position:100% center;";
-    @Test
-    public void parseCSS() throws IOException
-    {
-        File assetDir = new File(FetchUtil.ASSET_DIR);
-        FileUtils.deleteDirectory(assetDir);
-        assetDir.mkdirs();
-        Assert.assertEquals(0, assetDir.listFiles().length);
-        File file = new File(FetchUtil.ASSET_DIR + "/my.css");
-        FileUtils.write(file, css);
-        FetchCSS.getCSSFiles(file,driver);
-        Assert.assertEquals(2, assetDir.listFiles().length);
-    }
-    
-    @Test(expected=IllegalArgumentException.class)
-    public void parseCSSNull() throws IOException
-    {
-        FetchCSS.getCSSFiles(null,driver);
-    }
+ 
     
     @Test
     public void stripBaseTag()
