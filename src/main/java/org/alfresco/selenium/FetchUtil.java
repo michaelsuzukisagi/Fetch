@@ -261,8 +261,10 @@ public class FetchUtil
             throw new IllegalArgumentException("Html source code is required");
         }
         String value = html.substring(0);
-        value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);
         value = stripBaseTag(value);
+        value = stripMetaTag(value);
+        //Add the only meta tag we need that remove strange characters from page.
+        value = value.replaceFirst("<head>", "<head>\n" + UTF8_HTML);
         if(files != null)
         {
             for(String file : files)
@@ -308,7 +310,6 @@ public class FetchUtil
                                        final CloseableHttpClient client,
                                        final File output) throws IOException 
     {
-        
         HttpGet httpGet = new HttpGet(resourceUrl);
         BufferedOutputStream bos = null;
         BufferedInputStream bis = null;
@@ -345,11 +346,12 @@ public class FetchUtil
         return output;
     }
     private static final Pattern BASE_TAG = Pattern.compile("<base.*?\\>");
+    private static final Pattern META_TAG = Pattern.compile("<meta.*?\\>");
     /**
      * Checks and removes base tags such as:
      * <base href= />
      * @param value HTML source
-     * @return
+     * @return html with base tag removed
      */
     public static String stripBaseTag(String value)
     {
@@ -360,5 +362,23 @@ public class FetchUtil
         //Extract all source files
         Matcher matchSrc = BASE_TAG.matcher(value);
         return matchSrc.replaceFirst("");
+    }
+    /**
+     * Checks and removes meta tags such as:
+     * <meta href= /> as it was causing some conflicts with images url
+     * that shared the same path.
+     * 
+     * @param value HTML source
+     * @return 
+     */
+    public static String stripMetaTag(String value)
+    {
+        if(null == value)
+        {
+            throw new IllegalArgumentException("input required");
+        }
+        //Extract all source files
+        Matcher matchSrc = META_TAG.matcher(value);
+        return matchSrc.replaceAll("");
     }
 }
